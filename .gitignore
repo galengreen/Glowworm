@@ -1,0 +1,4 @@
+node_modules
+dist
+.learnsmart/
+.DS_Store

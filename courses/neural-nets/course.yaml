@@ -1,0 +1,11 @@
+id: neural-nets
+title: How a neural network learns
+subtitle: From a single neuron to learning by gradient descent. A sample course for the LearnSmart prototype.
+sample: true
+levels:
+  - id: neuron
+    title: A single neuron
+    lessons: [01-neuron]
+  - id: learning
+    title: Learning by going downhill
+    lessons: [02-gradient-descent]

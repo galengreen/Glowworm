@@ -1,0 +1,40 @@
+- id: act-why-nonlinear
+  type: mcq
+  concept: activation-function
+  prompt: Why do neural networks need **non-linear** activation functions?
+  choices:
+    - To make training faster on GPUs
+    - Without them, stacked layers collapse into a single linear function
+    - To keep outputs between 0 and 1
+    - To stop the weights from becoming negative
+  answer: 1
+  hints:
+    - What is a weighted sum of weighted sums?
+  explain: A chain of weighted sums is still one weighted sum. Without non-linearity, extra layers add no expressive power.
+
+- id: act-step-output
+  type: numeric
+  concept: activation-function
+  prompt: |
+    A perceptron (step activation: output 1 if $z > 0$, else 0) has $w = (0.4, 0.4)$ and $b = -0.5$. What is its output for $x = (1, 0)$?
+  answer: 0
+  tolerance: 0
+  hints:
+    - Compute $z$ first, then apply the step.
+  explain: $z = 0.4 - 0.5 = -0.1$, which is not above 0, so the output is 0.
+
+- id: act-xor
+  type: short
+  concept: activation-function
+  prompt: Explain why a single perceptron cannot compute XOR.
+  hints:
+    - A perceptron splits its input space with one straight line.
+    - Plot XOR's four input points and mark which are true.
+  markScheme:
+    - point: A perceptron's decision boundary is a single straight line (it is a linear classifier)
+      marks: 1
+      feedback: The step fires when $w \cdot x + b > 0$, and the boundary $w \cdot x + b = 0$ is a straight line.
+    - point: XOR's true cases (0,1),(1,0) cannot be separated from its false cases (0,0),(1,1) by one straight line
+      marks: 1
+      feedback: XOR is not linearly separable. Its true points sit on one diagonal and its false points on the other.
+  model: A perceptron fires when $w \cdot x + b > 0$, so its decision boundary is a single straight line. XOR's true inputs (0,1) and (1,0) lie on one diagonal and its false inputs (0,0) and (1,1) on the other, so no single line separates them. You need a hidden layer.

@@ -1,0 +1,55 @@
+- id: ws-compute
+  type: numeric
+  concept: weighted-sum
+  prompt: |
+    A neuron has weights $w = (0.5, -0.2)$ and bias $b = 0.1$. What is the weighted sum $z$ for inputs $x = (2, 3)$?
+  answer: 0.5
+  tolerance: 0.001
+  hints:
+    - $z = w_1 x_1 + w_2 x_2 + b$
+    - $0.5 \times 2 = 1$ and $-0.2 \times 3 = -0.6$
+  explain: $z = 0.5 \times 2 + (-0.2) \times 3 + 0.1 = 1 - 0.6 + 0.1 = 0.5$.
+
+- id: ws-negative-weight
+  type: mcq
+  concept: weighted-sum
+  prompt: An input has a large **negative** weight. What happens to the weighted sum when that input increases?
+  choices:
+    - It increases
+    - It decreases
+    - It stays the same
+    - It becomes zero
+  answer: 1
+  hints:
+    - Multiply a bigger positive number by a negative weight.
+  explain: The input's contribution is $w_i x_i$. With $w_i < 0$, a bigger $x_i$ makes the contribution more negative, so $z$ falls.
+
+- id: ws-bias
+  type: short
+  concept: weighted-sum
+  prompt: What does the bias do in a neuron? Explain why a neuron with a very negative bias rarely activates.
+  hints:
+    - The bias is added after the weighted inputs. Does it depend on the inputs?
+  markScheme:
+    - point: The bias is added to the weighted sum regardless of the inputs (it shifts the total)
+      marks: 1
+      feedback: The bias doesn't multiply anything. It shifts $z$ by a fixed amount.
+    - point: A very negative bias means the weighted inputs must be large to push z above the threshold
+      marks: 1
+      feedback: To activate, the weighted inputs have to overcome the bias. A very negative bias sets a high bar.
+  model: The bias is a constant added to the weighted sum whatever the inputs are, so it shifts how easily the neuron activates. With a very negative bias, the weighted inputs must be very large to push $z$ above zero, so the neuron rarely fires.
+
+- id: ws-and-gate
+  type: mcq
+  concept: weighted-sum
+  prompt: |
+    A step-activation neuron has bias $b = -0.5$. Which weights make it an **AND** gate (fires only when both inputs are 1)?
+  choices:
+    - $w = (0.6, 0.6)$
+    - $w = (0.3, 0.3)$
+    - $w = (0.1, 0.1)$
+    - $w = (-0.3, -0.3)$
+  answer: 1
+  hints:
+    - Check one input on, then both on. One alone must give $z \le 0$.
+  explain: With $(0.3, 0.3)$, one input gives $-0.2$ (off) and both give $0.1$ (on). $(0.6, 0.6)$ fires with one input, so it's OR.

@@ -1,0 +1,34 @@
+- id: loss-square
+  type: numeric
+  concept: loss-function
+  prompt: A network predicts $\hat{y} = 5$ when the target is $y = 2$. What is the squared error?
+  answer: 9
+  tolerance: 0
+  hints:
+    - Squared error is $(\hat{y} - y)^2$.
+  explain: $(5 - 2)^2 = 3^2 = 9$.
+
+- id: loss-why-square
+  type: mcq
+  concept: loss-function
+  prompt: Why square the errors rather than just adding them up?
+  choices:
+    - Squaring makes the loss faster to compute
+    - So positive and negative errors can't cancel out, and large errors count much more
+    - Squaring keeps the loss between 0 and 1
+    - So the gradient is always positive
+  answer: 1
+  hints:
+    - What would happen if one error was +3 and another was −3?
+  explain: Squaring makes every error positive (no cancelling) and punishes large errors disproportionately (2 → 4, but 4 → 16).
+
+- id: loss-mse
+  type: numeric
+  concept: loss-function
+  prompt: |
+    Three predictions have errors $\hat{y} - y$ of $1$, $-2$ and $3$. What is the mean squared error?
+  answer: 4.667
+  tolerance: 0.01
+  hints:
+    - Square each error first, then average.
+  explain: $(1 + 4 + 9) / 3 = 14 / 3 \approx 4.67$.

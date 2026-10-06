@@ -1,0 +1,42 @@
+- id: neuron-steps
+  type: mcq
+  concept: neuron
+  prompt: In what order does an artificial neuron process its inputs?
+  choices:
+    - Activate each input, then sum, then weigh
+    - Weigh each input, sum with the bias, then activate
+    - Sum the inputs, activate, then multiply by the weights
+    - Weigh each input, activate each one, then sum
+  answer: 1
+  hints:
+    - The activation function is applied once, to a single number.
+  explain: Weigh → sum (plus bias) → activate. The activation is applied once, to the total $z$.
+
+- id: neuron-params
+  type: mcq
+  concept: neuron
+  prompt: Which of these are the **parameters** a neuron learns during training?
+  choices:
+    - The inputs and the output
+    - The weights and the bias
+    - The activation function and the loss
+    - The learning rate and the number of layers
+  answer: 1
+  hints:
+    - Parameters are the values training adjusts. The inputs come from the data.
+  explain: Training adjusts the weights and bias. Inputs come from data; the learning rate and layer count are *hyperparameters* chosen before training.
+
+- id: neuron-learning
+  type: short
+  concept: neuron
+  prompt: Explain what it means for a single neuron to "learn".
+  hints:
+    - What changes inside the neuron, and what is that change trying to achieve?
+  markScheme:
+    - point: States that the weights and/or bias are adjusted
+      marks: 1
+      feedback: Learning changes the parameters, the weights and bias, not the inputs or the formula.
+    - point: States that the goal is to reduce the loss / make outputs closer to the targets
+      marks: 1
+      feedback: The adjustment has a direction. It's chosen to make the outputs more correct, measured by the loss.
+  model: Learning means adjusting the neuron's weights and bias so that its outputs get closer to the desired targets, which is measured by a loss that training tries to reduce.

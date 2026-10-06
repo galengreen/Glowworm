@@ -1,0 +1,56 @@
+/* Design tokens. Dark mode only for now; names are semantic so a light set can be swapped in later. */
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --bg: #0c0d0e;
+  --panel: #141516;
+  --edge: #222426;
+  --body: #17181a; /* isometric side faces */
+  --deck: #1b1d1f; /* isometric top faces */
+  --recess: #0e0f10;
+  --glass: #0f1011;
+
+  /* strokes: decorative structure vs strokes that teach */
+  --detail: #2b2e30;
+  --line: #3d4144;
+  --ink-dim: #8f9499; /* tertiary text: labels, numbers, eyebrows (6:1 on panel) */
+  --ink: #b4b8bb; /* secondary text and strokes that teach (9:1) */
+  --ink-read: #d7dadc; /* long-form reading text (13:1) */
+  --ink-hi: #e6e8e9; /* headings, emphasis (15:1) */
+
+  /* the one accent: means "live" (active, flowing, correct, your progress) */
+  --accent: #ff7a1a;
+  --accent-hi: #ffb070;
+  --accent-dim: color-mix(in srgb, var(--accent) 10%, transparent);
+  --glass-on: color-mix(in srgb, var(--accent) 9%, #101112);
+
+  /* reserved, muted: incorrect (always paired with an icon) */
+  --miss: #e08a8a;
+
+  /* type */
+  --mono: 'DM Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* reading settings (overridden by user preferences) */
+  --read-size: 18px;
+  --read-leading: 1.65;
+  --read-tracking: 0.005em;
+  --read-word-spacing: 0.02em;
+  --measure: 66ch;
+
+  /* shape and motion */
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 0.16s;
+  --dur: 0.4s;
+}
+
+:root[data-spacing='wide'] {
+  --read-leading: 1.9;
+  --read-tracking: 0.06em;
+  --read-word-spacing: 0.16em;
+  --measure: 58ch;
+}

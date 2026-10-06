@@ -1,0 +1,46 @@
+- id: gd-update
+  type: numeric
+  concept: gradient-descent
+  prompt: |
+    With learning rate $\eta = 0.1$, a weight $w = 2$ has gradient $\partial L / \partial w = 4$. What is $w$ after one gradient descent step?
+  answer: 1.6
+  tolerance: 0.001
+  hints:
+    - $w \leftarrow w - \eta \cdot \partial L / \partial w$
+  explain: $w = 2 - 0.1 \times 4 = 1.6$.
+
+- id: gd-direction
+  type: mcq
+  concept: gradient-descent
+  prompt: Why does gradient descent **subtract** the gradient rather than add it?
+  choices:
+    - Because the gradient is always positive
+    - Because the gradient points uphill, so subtracting it moves downhill on the loss
+    - Because subtraction is cheaper to compute
+    - Because the learning rate is negative
+  answer: 1
+  hints:
+    - Which direction does the gradient point: towards higher or lower loss?
+  explain: The gradient points in the direction of steepest *increase*. Moving against it reduces the loss.
+
+- id: gd-explain
+  type: short
+  concept: gradient-descent
+  prompt: Describe how gradient descent trains a neural network. Include the update rule.
+  hints:
+    - What is computed each step, and how is each weight changed?
+  markScheme:
+    - point: Computes the gradient of the loss with respect to the weights
+      marks: 1
+      feedback: Each step starts by measuring the slope of the loss for each weight.
+    - point: "Gives the update rule w ← w − η ∂L/∂w (moves against the gradient)"
+      marks: 1
+      feedback: The weight moves a small step against its gradient.
+    - point: Mentions the learning rate controlling step size
+      marks: 1
+      feedback: η scales each step.
+    - point: Repeats until the loss stops decreasing / converges
+      marks: 1
+      feedback: It's iterative. Many small steps, not one jump.
+  model: |
+    Gradient descent repeatedly computes the gradient of the loss with respect to each weight and moves each weight a small step against it: $w \leftarrow w - \eta \, \partial L / \partial w$, where the learning rate $\eta$ sets the step size. Repeating this lowers the loss until it settles at a minimum.

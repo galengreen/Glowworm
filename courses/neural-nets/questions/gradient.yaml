@@ -1,0 +1,42 @@
+- id: grad-sign
+  type: mcq
+  concept: gradient
+  prompt: At the current weight, the gradient $\partial L / \partial w$ is **negative**. What does that tell you?
+  choices:
+    - The loss is negative
+    - Increasing the weight will decrease the loss
+    - Increasing the weight will increase the loss
+    - You are at the minimum
+  answer: 1
+  hints:
+    - The gradient is the slope. Which way does a negative slope go as you move right?
+  explain: A negative slope means the loss goes down as $w$ goes up, so gradient descent will increase $w$.
+
+- id: grad-compute
+  type: numeric
+  concept: gradient
+  prompt: |
+    For $L(w) = \tfrac12 (w - 3)^2$, the gradient is $L'(w) = w - 3$. What is the gradient at $w = 7$?
+  answer: 4
+  tolerance: 0
+  hints:
+    - Substitute $w = 7$.
+  explain: $7 - 3 = 4$. A positive slope, so decreasing $w$ lowers the loss.
+
+- id: grad-explain
+  type: short
+  concept: gradient
+  prompt: In your own words, what is the gradient of the loss, and how is it computed for every weight in a network?
+  hints:
+    - Think of the slope of a curve, and then of many weights at once.
+  markScheme:
+    - point: The gradient is the slope / rate of change of the loss with respect to each parameter
+      marks: 1
+      feedback: It measures how much the loss changes if you nudge each parameter.
+    - point: It points in the direction of steepest increase of the loss (uphill)
+      marks: 1
+      feedback: That's why gradient descent subtracts it.
+    - point: Backpropagation computes it efficiently using the chain rule
+      marks: 1
+      feedback: Backprop applies the chain rule backwards through the layers to get every gradient in one pass.
+  model: The gradient is the vector of slopes of the loss with respect to each parameter. It points in the direction where the loss increases fastest. Networks compute it for every weight with backpropagation, which applies the chain rule backwards through the layers.

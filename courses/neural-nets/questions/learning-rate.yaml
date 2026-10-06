@@ -1,0 +1,43 @@
+- id: lr-too-big
+  type: mcq
+  concept: learning-rate
+  prompt: During training, the loss gets **larger** every step, bouncing further from the minimum each time. What is the most likely cause?
+  choices:
+    - The learning rate is too small
+    - The learning rate is too large
+    - The loss function is wrong
+    - There are too few training examples
+  answer: 1
+  hints:
+    - Try η above 2 in the figure.
+  explain: Steps overshoot the minimum by more each time, so the loss diverges. Lower the learning rate.
+
+- id: lr-too-small
+  type: mcq
+  concept: learning-rate
+  prompt: The loss decreases steadily but extremely slowly. Which change is most likely to help?
+  choices:
+    - Decrease the learning rate
+    - Increase the learning rate
+    - Use a non-linear loss
+    - Remove the bias
+  answer: 1
+  hints:
+    - Steps are stable but tiny.
+  explain: Stable but slow progress means the steps are too small. A larger learning rate speeds it up, as long as it doesn't overshoot.
+
+- id: lr-oscillate
+  type: short
+  concept: learning-rate
+  prompt: |
+    For $L(w) = \tfrac12 (w - 3)^2$, describe what gradient descent does with $\eta = 1.5$, and explain why.
+  hints:
+    - Each step multiplies the distance to the minimum by $(1 - \eta)$.
+  markScheme:
+    - point: It oscillates / overshoots to the other side of the minimum each step
+      marks: 1
+      feedback: $1 - 1.5 = -0.5$ is negative, so each step flips sides.
+    - point: It still converges, because the distance shrinks (|1 − η| = 0.5 < 1)
+      marks: 1
+      feedback: The magnitude halves every step, so it settles despite the bouncing.
+  model: Each step multiplies the distance to the minimum by $1 - \eta = -0.5$. The negative sign means it jumps to the other side every step (oscillates), but the magnitude halves each time, so it still converges.
