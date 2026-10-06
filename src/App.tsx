@@ -3,18 +3,15 @@ import { DEFS } from '@kit';
 import { courseDir, courses, findCourse } from './course/load';
 import type { Course } from './course/types';
 import { CourseContext } from './render/context';
-import { useInbox } from './state/inbox';
-import { dueQuestions, lessonProgress, resetProgress, useProgress } from './state/progress';
+import { lessonProgress, resetProgress, useProgress } from './state/progress';
 import { go, href, useRoute, type Route } from './state/router';
 import { ACCENTS, settings, useSettings } from './state/settings';
 import { closeDrawer, setPalette } from './state/ui';
 import { CommandPalette } from './ui/CommandPalette';
 import { Drawer } from './ui/Drawer';
-import { Highlighter } from './ui/Highlighter';
 import { Home } from './ui/views/Home';
-import { InboxView } from './ui/views/Inbox';
 import { Lesson } from './ui/views/Lesson';
-import { Practice, Review } from './ui/views/Practice';
+import { Practice } from './ui/views/Practice';
 import { SourceView } from './ui/views/Source';
 import { WikiIndex, WikiPageView } from './ui/views/Wiki';
 
@@ -41,15 +38,12 @@ export function App() {
       </main>
       <Drawer />
       <CommandPalette />
-      <Highlighter />
     </CourseContext.Provider>
   );
 }
 
 function TopBar({ course, dir, route }: { course: Course; dir: string; route: Route }) {
   const p = useProgress(dir);
-  const due = dueQuestions(course, p).length;
-  const open = useInbox().filter((r) => r.course === dir && r.status === 'open').length;
   const lesson = route.view === 'lesson' ? course.lessons[route.id ?? ''] : undefined;
   const lp = lesson ? lessonProgress(lesson, p) : undefined;
 
@@ -59,8 +53,6 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
     wiki: route.id ? course.wiki[route.id]?.title ?? 'Concept' : 'Concepts',
     source: course.sources[route.id ?? '']?.title ?? 'Source',
     practice: 'Practice',
-    review: 'Review',
-    inbox: 'Inbox',
   };
 
   return (
@@ -85,12 +77,6 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
       <span className="spacer" />
       <button className={`chip${route.view === 'wiki' ? ' current' : ''}`} onClick={() => go(dir, 'wiki')} title="Every concept in the course (the wiki)">
         Concepts<span className="n dim">{Object.keys(course.wiki).length}</span>
-      </button>
-      <button className={`chip${due ? ' live' : ''}`} onClick={() => go(dir, 'review')} title="Questions due for spaced review">
-        Review{due > 0 && <span className="n">{due}</span>}
-      </button>
-      <button className="chip" onClick={() => go(dir, 'inbox')} title="Requests sent to your agent">
-        Inbox{open > 0 && <span className="n">{open}</span>}
       </button>
       <button className="chip" onClick={() => setPalette(true)} title="Search lessons and concepts">
         Search <kbd>⌘K</kbd>
@@ -173,7 +159,7 @@ function View({ course, route }: { course: Course; route: Route }) {
   switch (route.view) {
     case 'lesson': {
       const lesson = course.lessons[route.id ?? ''];
-      return lesson ? <Lesson key={lesson.id} lesson={lesson} /> : <Missing what="lesson" />;
+      return lesson ? <Lesson key={lesson.id} lesson={lesson} focus={route.sub} /> : <Missing what="lesson" />;
     }
     case 'wiki': {
       if (!route.id) return <WikiIndex />;
@@ -188,10 +174,6 @@ function View({ course, route }: { course: Course; route: Route }) {
       const concepts = route.query.get('concepts')?.split(',').filter(Boolean);
       return <Practice key={route.query.toString()} concepts={concepts} />;
     }
-    case 'review':
-      return <Review />;
-    case 'inbox':
-      return <InboxView />;
     default:
       return <Home />;
   }

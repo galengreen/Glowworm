@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { openDrawer, sourceItem } from '../state/ui';
 import { QuestionCard } from '../ui/QuestionCard';
+import { Boundary } from '../ui/Boundary';
 import { useCourse } from './context';
 import { Figure } from './Figure';
 import { remarkGlowworm } from './remarkGlowworm';
@@ -76,7 +77,7 @@ function Recall({ q = '' }: P) {
   const { course } = useCourse();
   const question = course.questions[q];
   if (!question) return <div className="question">Missing question “{q}”</div>;
-  return <QuestionCard q={question} mode="recall" />;
+  return <Boundary label={`question "${q}"`}><QuestionCard q={question} mode="recall" /></Boundary>;
 }
 
 /** Reveals list items one at a time, so worked examples and processes build up step by step. */

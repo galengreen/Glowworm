@@ -2,7 +2,7 @@
 
 Conventions for any agent (Claude Code, Codex, …) that writes or edits a course. Read [PRODUCT.md](PRODUCT.md) for the why; this file is the how.
 
-**Loop:** read the sources → write wiki pages → write lessons, widgets and questions → `pnpm glowworm validate` until it passes → check the result in the player (`pnpm dev`) → work through `pnpm glowworm inbox`.
+**Loop:** read the sources → write wiki pages → write lessons, widgets and questions → `pnpm glowworm validate` until it passes → check the result in the player (`pnpm dev`).
 
 ## Folder layout
 
@@ -47,7 +47,7 @@ Keep pages short: definition, key explanation, worked example, common misconcept
 
 ## Lessons
 
-- Split into segments with `## Title {#stable-id}`. **Segment ids are permanent**: inbox requests and progress refer to them, so never rename an id. Add new ones instead.
+- Split into segments with `## Title {#stable-id}`. **Segment ids are permanent**: progress refers to them, so never rename an id. Add new ones instead.
 - Each segment: show first, then a little prose, then one `::recall{q=<question-id>}`. The next segment unlocks once the recall question has been attempted.
 - **Show, don't tell.** If it can be a diagram, make it a figure. `validate` warns on segments over 160 words with no figure.
 - Prose is for the *why* and caveats. Short sentences, plain language, left-aligned.
@@ -121,23 +121,3 @@ export default defineWidget({
 6. **Teaching labels face the screen:** use `label()` at a projected point, not text on an isometric face.
 7. **Accessible:** a full `aria` description, every interaction available from the keyboard via `key()`, and respect `api.calm` (no animation).
 8. Use `api.after/every/loop` for timing so everything is cleaned up on unmount. Put native controls (sliders, buttons) in `api.controls`.
-
-## Inbox
-
-The user highlights text in the player and sends a request. Work through them at the start of each session:
-
-```sh
-pnpm glowworm inbox                     # open requests
-pnpm glowworm inbox show <id>           # full request: file, block id, quote with surrounding text
-pnpm glowworm inbox resolve <id> "what you changed"
-```
-
-| Intent | What to do |
-|---|---|
-| `explain` | Expand the explanation, or add a wiki page if the concept is missing |
-| `example` | Add a worked example (`:::steps`) or a widget |
-| `wrong` | Check against the cited source. Fix it, or reply explaining why it's right, quoting the source |
-| `quiz` | Add questions that cite the concept |
-| `note` | Follow the note (e.g. "not examinable": mark questions `exam: false`) |
-
-Find the spot by `block` id first, then by the quote and the text either side of it. Never edit `sources/`.

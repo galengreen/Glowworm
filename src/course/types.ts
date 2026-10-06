@@ -9,6 +9,8 @@ export interface CourseMeta {
   title: string;
   subtitle?: string;
   sample?: boolean;
+  /** Exam date and time, e.g. 2026-11-06T09:30, for the countdown on the home page. */
+  exam?: string;
   levels: Level[];
 }
 

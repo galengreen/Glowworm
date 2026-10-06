@@ -1,6 +1,5 @@
-// Local progress: attempts, FSRS review cards, passed segments and predictions. Stored per course in localStorage.
+// Local progress: attempts, passed segments and predictions. Stored per course in localStorage.
 import { useSyncExternalStore } from 'react';
-import { createEmptyCard, fsrs, Rating, type Card, type Grade } from 'ts-fsrs';
 import { scanDirectives } from '../course/parse';
 import type { Course, Lesson, Segment } from '../course/types';
 import { createStore } from './store';
@@ -14,7 +13,6 @@ export interface Attempt {
 
 export interface CourseProgress {
   attempts: Record<string, Attempt[]>;
-  cards: Record<string, Card>;
   segments: Record<string, true>;
   predictions: Record<string, string>;
   /** Last lesson opened, for "continue where you left off". */
@@ -24,22 +22,10 @@ export interface CourseProgress {
 type AllProgress = Record<string, CourseProgress>;
 
 const KEY = 'glowworm:progress:v1';
-const empty = (): CourseProgress => ({ attempts: {}, cards: {}, segments: {}, predictions: {} });
+const empty = (): CourseProgress => ({ attempts: {}, segments: {}, predictions: {} });
 
-function revive(all: AllProgress): AllProgress {
-  for (const p of Object.values(all)) {
-    for (const c of Object.values(p.cards)) {
-      c.due = new Date(c.due);
-      if (c.last_review) c.last_review = new Date(c.last_review);
-    }
-  }
-  return all;
-}
-
-export const progress = createStore<AllProgress>(revive(JSON.parse(localStorage.getItem(KEY) ?? '{}')));
+export const progress = createStore<AllProgress>(JSON.parse(localStorage.getItem(KEY) ?? '{}'));
 progress.subscribe(() => localStorage.setItem(KEY, JSON.stringify(progress.get())));
-
-const scheduler = fsrs();
 
 export const useProgress = (course: string): CourseProgress =>
   useSyncExternalStore(progress.subscribe, () => progress.get()[course] ?? EMPTY);
@@ -49,25 +35,12 @@ function update(course: string, fn: (p: CourseProgress) => CourseProgress) {
   progress.set((all) => ({ ...all, [course]: fn(all[course] ?? empty()) }));
 }
 
-/** Correct with no hints → Good, partial or hinted → Hard, wrong → Again. */
-function grade(score: number, max: number, hints: number): Grade {
-  const r = max ? score / max : 0;
-  if (r >= 1) return hints ? Rating.Hard : Rating.Good;
-  if (r >= 0.5) return Rating.Hard;
-  return Rating.Again;
-}
-
 export function recordAttempt(course: string, qid: string, score: number, max: number, hints: number) {
   const now = new Date();
-  update(course, (p) => {
-    const card = p.cards[qid] ?? createEmptyCard(now);
-    const next = scheduler.next(card, now, grade(score, max, hints)).card;
-    return {
-      ...p,
-      attempts: { ...p.attempts, [qid]: [...(p.attempts[qid] ?? []), { at: now.getTime(), score, max, hints }] },
-      cards: { ...p.cards, [qid]: next },
-    };
-  });
+  update(course, (p) => ({
+    ...p,
+    attempts: { ...p.attempts, [qid]: [...(p.attempts[qid] ?? []), { at: now.getTime(), score, max, hints }] },
+  }));
 }
 
 export const passSegment = (course: string, seg: string) =>
@@ -102,12 +75,6 @@ export function levelMastery(course: Course, p: CourseProgress, levelId: string)
   return concepts.reduce((s, c) => s + conceptMastery(course, p, c), 0) / concepts.length;
 }
 
-export const dueQuestions = (course: Course, p: CourseProgress, now = new Date()) =>
-  Object.entries(p.cards)
-    .filter(([qid, c]) => course.questions[qid] && c.due <= now)
-    .sort((a, b) => a[1].due.getTime() - b[1].due.getTime())
-    .map(([qid]) => qid);
-
 export const MASTERY_GATE = 0.7;
 
 // ---------- lesson progress ----------
@@ -131,4 +98,15 @@ export function continueTarget(course: Course, p: CourseProgress): { lesson: str
   const next = order.find(unfinished);
   if (next) return { lesson: next, fresh: !Object.keys(p.attempts).length };
   return null;
+}
+
+/** Where a concept is taught: the first section (in course order) that links it, else the start of the first lesson that lists it. */
+export function teachingLocation(course: Course, concept: string): { lesson: string; segment?: string } | null {
+  const order = course.meta.levels.flatMap((l) => l.lessons).filter((id) => course.lessons[id]);
+  for (const id of order) {
+    const seg = course.lessons[id].segments.find((s) => scanDirectives(s.body).concepts.includes(concept));
+    if (seg) return { lesson: id, segment: seg.id };
+  }
+  const listed = order.find((id) => course.lessons[id].concepts.includes(concept));
+  return listed ? { lesson: listed } : null;
 }

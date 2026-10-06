@@ -20,7 +20,7 @@
     - Because the learning rate is negative
   answer: 1
   hints:
-    - Which direction does the gradient point: towards higher or lower loss?
+    - 'Which direction does the gradient point: towards higher or lower loss?'
   explain: The gradient points in the direction of steepest *increase*. Moving against it reduces the loss.
 
 - id: gd-explain

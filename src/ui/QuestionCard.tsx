@@ -8,7 +8,7 @@ import { openDrawer, sourceItem, sourceLabel } from '../state/ui';
 
 interface Props {
   q: Question;
-  mode: 'recall' | 'practice' | 'review';
+  mode: 'recall' | 'practice';
   onNext?: () => void;
   /** Session shortcuts: 1–4 choose, H hint, Enter next. Only one card on screen should have this. */
   keyboard?: boolean;
@@ -102,9 +102,9 @@ export function QuestionCard({ q, mode, onNext, keyboard }: Props) {
   const markTotal = q.type === 'short' ? q.markScheme.reduce((s, p, i) => s + (ticks[i] ? p.marks : 0), 0) : 0;
 
   return (
-    <div className="question" data-block={q.id} data-file={q.file} data-locked={result ? 'false' : 'true'}>
+    <div className="question" data-block={q.id} data-file={q.file}>
       <div className="q-head label-sm">
-        <span><span className="tag">{mode === 'recall' ? 'Check yourself' : mode === 'review' ? 'Review' : 'Practice'}</span> · {TYPE_LABEL[q.type]}</span>
+        <span><span className="tag">{mode === 'recall' ? 'Check yourself' : 'Practice'}</span> · {TYPE_LABEL[q.type]}</span>
         <span>{attempts ? `${attempts} attempt${attempts > 1 ? 's' : ''}` : 'New'}</span>
       </div>
       <div className="prompt"><Md source={q.prompt} className="" /></div>

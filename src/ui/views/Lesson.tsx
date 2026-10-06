@@ -2,16 +2,16 @@ import { useEffect } from 'react';
 import type { Lesson as LessonT } from '../../course/types';
 import { useCourse } from '../../render/context';
 import { Md } from '../../render/Md';
-import { useInbox } from '../../state/inbox';
-import { passSegment, segmentPassed, segmentRecalls, setLast, useProgress } from '../../state/progress';
+import { Boundary } from '../Boundary';
+import { conceptMastery, passSegment, segmentPassed, segmentRecalls, setLast, useProgress } from '../../state/progress';
 import { go } from '../../state/router';
 import { openDrawer } from '../../state/ui';
-import { pad } from '../bits';
+import { Covers, Ring, pad } from '../bits';
 
-export function Lesson({ lesson }: { lesson: LessonT }) {
+/** `focus`: a section id to scroll to (e.g. from a concept page's "Learn this"). */
+export function Lesson({ lesson, focus }: { lesson: LessonT; focus?: string }) {
   const { course, dir } = useCourse();
   const p = useProgress(dir);
-  const updated = new Set(useInbox().filter((r) => r.course === dir && r.status === 'done').map((r) => r.block));
 
   useEffect(() => setLast(dir, lesson.id), [dir, lesson.id]);
 
@@ -27,32 +27,50 @@ export function Lesson({ lesson }: { lesson: LessonT }) {
   const titled = lesson.segments.filter((s) => s.title);
   const scrollTo = (id: string) => document.getElementById(`seg-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  // Jump to the focused section; if it's still locked, go to the section that's currently open instead.
+  useEffect(() => {
+    if (!focus) return;
+    const idx = lesson.segments.findIndex((s) => s.id === focus);
+    if (idx < 0) return;
+    const target = idx < visible ? focus : lesson.segments[Math.max(0, visible - 1)].id;
+    const t = setTimeout(() => scrollTo(target), 150);
+    return () => clearTimeout(t);
+  }, [focus, lesson.id]);
+
   return (
     <div className="lesson">
-      <nav className="rail" aria-label="Sections">
-        {titled.map((seg, i) => {
-          const idx = lesson.segments.indexOf(seg);
-          const state = segmentPassed(p, seg) ? 'done' : idx === firstOpen ? 'current' : '';
-          return (
-            <button key={seg.id} className={state} disabled={idx >= visible} onClick={() => scrollTo(seg.id)}>
-              <span className="state" />
-              <span><span className="num">{pad(i + 1)}</span> {seg.title}</span>
-            </button>
-          );
-        })}
+      <nav className="rail" aria-label="Lesson">
+        <div className="rail-group">
+          <span className="label-sm">Sections</span>
+          {titled.map((seg, i) => {
+            const idx = lesson.segments.indexOf(seg);
+            const state = segmentPassed(p, seg) ? 'done' : idx === firstOpen ? 'current' : '';
+            return (
+              <button key={seg.id} className={state} disabled={idx >= visible} onClick={() => scrollTo(seg.id)}>
+                <span className="state" />
+                <span><span className="num">{pad(i + 1)}</span> {seg.title}</span>
+              </button>
+            );
+          })}
+        </div>
+        {lesson.concepts.length > 0 && (
+          <div className="rail-group concepts">
+            <span className="label-sm">Concepts in this lesson</span>
+            {lesson.concepts.map((c) => (
+              <button key={c} onClick={() => openDrawer({ kind: 'concept', id: c })}>
+                <Ring value={conceptMastery(course, p, c)} size={16} stroke={2} />
+                <span>{course.wiki[c]?.title ?? c}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </nav>
 
       <div className="main">
         <div className="lesson-head">
           <span className="label-sm">Level {pad(levelIdx + 1)} · {level?.title}</span>
           <h1>{lesson.title}</h1>
-          <div className="concept-chips">
-            {lesson.concepts.map((c) => (
-              <button key={c} className="cchip" style={{ paddingLeft: 12 }} onClick={() => openDrawer({ kind: 'concept', id: c })}>
-                {course.wiki[c]?.title ?? c}
-              </button>
-            ))}
-          </div>
+          <Covers concepts={lesson.concepts} className="narrow-only" />
         </div>
 
         {lesson.segments.slice(0, visible + 1).map((seg, i) => {
@@ -62,7 +80,7 @@ export function Lesson({ lesson }: { lesson: LessonT }) {
             <section
               key={seg.id}
               id={`seg-${seg.id}`}
-              className={`seg${locked ? ' locked' : ''}${updated.has(seg.id) ? ' updated' : ''}`}
+              className={`seg${locked ? ' locked' : ''}`}
               data-block={seg.id}
               data-file={lesson.file}
               aria-hidden={locked}
@@ -73,7 +91,7 @@ export function Lesson({ lesson }: { lesson: LessonT }) {
                   <h2>{seg.title}</h2>
                 </div>
               )}
-              <Md source={seg.body} />
+              <Boundary label="this section"><Md source={seg.body} /></Boundary>
               {i === firstOpen && segmentRecalls(seg).length > 0 && (
                 <div className="gate">
                   <span className="dot" />

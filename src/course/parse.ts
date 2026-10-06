@@ -190,6 +190,17 @@ export function validateCourse(course: Course, widgetSources: Record<string, str
   }
 
   for (const q of Object.values(course.questions)) {
+    const text: [string, unknown][] = [
+      ['prompt', q.prompt],
+      ['explain', q.explain],
+      ...q.hints.map((h, i): [string, unknown] => [`hints[${i}]`, h]),
+      ...(q.type === 'mcq' ? q.choices.map((c, i): [string, unknown] => [`choices[${i}]`, c]) : []),
+      ...(q.type === 'short' ? q.markScheme.flatMap((m, i): [string, unknown][] => [[`markScheme[${i}].point`, m.point], [`markScheme[${i}].feedback`, m.feedback]]) : []),
+      ...(q.type === 'short' ? [['model', q.model] as [string, unknown]] : []),
+    ];
+    for (const [field, v] of text) {
+      if (v !== undefined && typeof v !== 'string') err(q.file, `Question "${q.id}" ${field} isn't text (a "word: …" item parses as a mapping); quote it`);
+    }
     if (!course.wiki[q.concept]) err(q.file, `Question "${q.id}" cites missing concept "${q.concept}"`);
     if (q.type === 'mcq' && (q.answer < 0 || q.answer >= q.choices.length)) err(q.file, `Question "${q.id}" answer out of range`);
     if (q.type === 'short' && !q.markScheme?.length) err(q.file, `Question "${q.id}" has no mark scheme`);

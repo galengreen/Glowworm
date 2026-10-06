@@ -43,9 +43,7 @@ export function CommandPalette() {
     return [
       { label: 'Home', kind: 'Go', run: () => go(dir) },
       { label: 'Mixed practice', kind: 'Study', run: () => go(dir, 'practice') },
-      { label: 'Review due questions', kind: 'Study', run: () => go(dir, 'review') },
       { label: 'All concepts', kind: 'Go', run: () => go(dir, 'wiki') },
-      { label: 'Inbox', kind: 'Go', run: () => go(dir, 'inbox') },
       ...courses.filter((c) => courseDir(c) !== dir).map((c) => ({ label: `Switch to ${c.meta.title}`, kind: 'Course', run: () => go(courseDir(c)) })),
       ...order.map((id, i) => ({ label: `${i + 1}. ${course.lessons[id].title}`, kind: 'Lesson', run: () => go(dir, 'lesson', id) })),
       ...Object.values(course.wiki).map((w) => ({ label: w.title, kind: 'Concept', run: () => openDrawer({ kind: 'concept', id: w.id }) })),

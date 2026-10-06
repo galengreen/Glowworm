@@ -3,7 +3,7 @@ import type { Course, WikiPage } from '../../course/types';
 import { useCourse } from '../../render/context';
 import { Figure } from '../../render/Figure';
 import { Md } from '../../render/Md';
-import { conceptMastery, useProgress } from '../../state/progress';
+import { conceptMastery, teachingLocation, useProgress } from '../../state/progress';
 import { go } from '../../state/router';
 import { closeDrawer, openDrawer, sourceItem, sourceLabel } from '../../state/ui';
 import { Ring } from '../bits';
@@ -54,6 +54,7 @@ function Facts({ page, inDrawer }: { page: WikiPage; inDrawer?: boolean }) {
   const { course, dir } = useCourse();
   const p = useProgress(dir);
   const mastery = conceptMastery(course, p, page.id);
+  const learn = teachingLocation(course, page.id);
   const questions = Object.values(course.questions).filter((q) => q.concept === page.id);
   const lessons = Object.values(course.lessons).filter(
     (l) => l.concepts.includes(page.id) || l.segments.some((s) => scanDirectives(s.body).concepts.includes(page.id)),
@@ -82,9 +83,14 @@ function Facts({ page, inDrawer }: { page: WikiPage; inDrawer?: boolean }) {
           <div className="muted" style={{ fontSize: 13.5 }}>mastery · {questions.length} questions</div>
         </div>
       </div>
-      <button className="btn live" disabled={!questions.length} onClick={() => { closeDrawer(); go(dir, 'practice', undefined, undefined, { concepts: page.id }); }}>
-        Quiz me on this
-      </button>
+      <div className="concept-actions">
+        <button className="btn live" disabled={!learn} onClick={() => { closeDrawer(); if (learn) go(dir, 'lesson', learn.lesson, learn.segment); }} title={learn ? `Open "${course.lessons[learn.lesson].title}"` : 'Not taught in a lesson yet'}>
+          Learn this
+        </button>
+        <button className="btn live" disabled={!questions.length} onClick={() => { closeDrawer(); go(dir, 'practice', undefined, undefined, { concepts: page.id }); }}>
+          Quiz me on this
+        </button>
+      </div>
       {groups.filter(([, v]) => v).map(([k, v]) => (
         <div key={k}>
           <span className="label-sm">{k}</span>
@@ -92,6 +98,31 @@ function Facts({ page, inDrawer }: { page: WikiPage; inDrawer?: boolean }) {
         </div>
       ))}
     </>
+  );
+}
+
+/** Previous / next concept in learning order. */
+function ConceptPager({ current }: { current: string }) {
+  const { course, dir } = useCourse();
+  const list = orderedConcepts(course);
+  const i = list.findIndex((c) => c.id === current);
+  const prev = i > 0 ? list[i - 1] : undefined;
+  const next = i >= 0 && i < list.length - 1 ? list[i + 1] : undefined;
+  return (
+    <nav className="pager" aria-label="Concepts">
+      {prev ? (
+        <button className="pager-link" onClick={() => go(dir, 'wiki', prev.id)}>
+          <span className="label-sm">← Previous concept</span>
+          <span className="t">{prev.title}</span>
+        </button>
+      ) : <span />}
+      {next ? (
+        <button className="pager-link next" onClick={() => go(dir, 'wiki', next.id)}>
+          <span className="label-sm">Next concept →</span>
+          <span className="t">{next.title}</span>
+        </button>
+      ) : <span />}
+    </nav>
   );
 }
 
@@ -107,6 +138,7 @@ export function WikiPageView({ page }: { page: WikiPage }) {
           </div>
           {page.diagram && <Figure widgetId={page.diagram.widget} params={page.diagram.params} />}
           <Md source={page.body} />
+          <ConceptPager current={page.id} />
         </div>
         <aside><Facts page={page} /></aside>
       </div>

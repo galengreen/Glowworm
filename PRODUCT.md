@@ -254,7 +254,7 @@ This matches the research on pictures and words: people learn more from words *a
 
 ## MVP milestones
 
-> **Status (6 Oct 2026):** a working prototype covers most of milestone 1 and parts of 2–3: the player, the course format, the widget kit with two sample widgets, the highlight → inbox loop, and `glowworm validate`. See [README.md](README.md).
+> **Status (6 Oct 2026):** a working prototype covers most of milestone 1 and parts of 2–3: the player, the course format, the widget kit, and `glowworm validate`. Spaced review and the highlight → inbox loop were prototyped, then removed on 7 Oct 2026 until they can do something useful (see *Ask about anything* and *The learning model* for the intent). See [README.md](README.md).
 
 1. Dark-mode tokens and the line language; the isometric helper and SVG diagram primitives; format spec (including wiki pages and stable block IDs); conventions doc; and a player with lessons, wiki pages, about 8 core components, deterministic quizzes and progress stored locally.
 2. Widget kit and `glowworm preview --screenshot`. One AIML431 topic generated end to end (sources → wiki → lessons, widgets and questions), then used for real.

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import type { Question } from '../../course/types';
 import { useCourse } from '../../render/context';
-import { dueQuestions, progress, useProgress } from '../../state/progress';
+import { useProgress } from '../../state/progress';
 import { go } from '../../state/router';
 import { Bar } from '../bits';
 import { QuestionCard } from '../QuestionCard';
+import { Boundary } from '../Boundary';
 
 function shuffle<T>(list: T[]): T[] {
   const a = [...list];
@@ -18,12 +19,11 @@ function shuffle<T>(list: T[]): T[] {
 interface SessionProps {
   title: string;
   queue: Question[];
-  mode: 'practice' | 'review';
   empty: { title: string; body: string };
 }
 
 /** A focused run through a queue of questions, one at a time, then a summary. */
-function Session({ title, queue, mode, empty }: SessionProps) {
+function Session({ title, queue, empty }: SessionProps) {
   const { dir } = useCourse();
   const [i, setI] = useState(0);
   const [started] = useState(() => Date.now());
@@ -38,7 +38,7 @@ function Session({ title, queue, mode, empty }: SessionProps) {
     return (
       <div className="session">
         <div className="empty-state">
-          <span className="label-sm">{mode === 'review' ? 'Review' : 'Practice'}</span>
+          <span className="label-sm">Practice</span>
           <h2>{empty.title}</h2>
           <p>{empty.body}</p>
           <button className="btn" onClick={() => go(dir)}>Back to course</button>
@@ -54,7 +54,7 @@ function Session({ title, queue, mode, empty }: SessionProps) {
         <div className="empty-state">
           <span className="label-sm">Session complete</span>
           <h2>{score}/{max} marks · {pct}%</h2>
-          <p>{pct >= 80 ? 'Strong. These will come back for review just before you\'d forget them.' : 'The ones you missed will come back for review sooner. That\'s where the learning happens.'}</p>
+          <p>{pct >= 80 ? 'Strong. Come back in a few days and go again to lock it in.' : 'Go again on the ones you missed. Getting things wrong and retrying is where the learning happens.'}</p>
           <div className="row" style={{ justifyContent: 'center' }}>
             <button className="btn" onClick={() => setI(0)}>Go again</button>
             <button className="btn live" onClick={() => go(dir)}>Back to course</button>
@@ -73,7 +73,9 @@ function Session({ title, queue, mode, empty }: SessionProps) {
         </div>
         <Bar value={i / queue.length} />
       </div>
-      <QuestionCard key={q.id} q={q} mode={mode} keyboard onNext={() => setI((n) => n + 1)} />
+      <Boundary key={q.id} label={`question "${q.id}"`}>
+        <QuestionCard q={q} mode="practice" keyboard onNext={() => setI((n) => n + 1)} />
+      </Boundary>
       <div className="keys">
         {q.type === 'mcq' && <span><kbd>1</kbd>–<kbd>{q.choices.length}</kbd> choose</span>}
         <span><kbd>H</kbd> hint</span>
@@ -97,32 +99,8 @@ export function Practice({ concepts }: { concepts?: string[] }) {
     <Session
       title={names ? `Practise: ${names}` : 'Mixed practice'}
       queue={queue}
-      mode="practice"
-      empty={{ title: 'No questions here yet', body: 'Ask your agent to add some: highlight a concept and choose “Quiz me”.' }}
+      empty={{ title: 'No questions here yet', body: 'Ask your agent to add questions that cite these concepts.' }}
     />
   );
 }
 
-export function Review() {
-  const { course, dir } = useCourse();
-  // Snapshot the due list when the view opens, so answering doesn't reshuffle the queue.
-  const queue = useMemo(() => {
-    const p = progress.get()[dir];
-    return p ? dueQuestions(course, p).map((id) => course.questions[id]) : [];
-  }, [course, dir]);
-  const p = useProgress(dir);
-  const upcoming = Object.values(p.cards).map((c) => c.due.getTime()).filter((t) => t > Date.now()).sort((a, b) => a - b)[0];
-  return (
-    <Session
-      title="Review"
-      queue={queue}
-      mode="review"
-      empty={{
-        title: 'Nothing due',
-        body: upcoming
-          ? `Next review ${new Date(upcoming).toLocaleString('en-NZ', { weekday: 'long', hour: 'numeric', minute: '2-digit' })}. Questions come back just before you're likely to forget them.`
-          : 'Answer some questions in a lesson first. They\'ll come back here, spaced out so they stick.',
-      }}
-    />
-  );
-}

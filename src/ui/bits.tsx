@@ -1,4 +1,6 @@
 // Small shared display pieces.
+import { useCourse } from '../render/context';
+import { openDrawer } from '../state/ui';
 export const pad = (n: number) => String(n).padStart(2, '0');
 
 /** Line-art mastery ring: faint track, accent arc for progress. */
@@ -29,3 +31,20 @@ export const Pips = ({ done, total }: { done: number; total: number }) => (
 export const Bar = ({ value }: { value: number }) => (
   <div className="bar" aria-label={`${Math.round(value * 100)}%`}><i style={{ width: `${Math.round(value * 100)}%` }} /></div>
 );
+
+/** "Covers: A · B · C": the concepts something teaches, each opening in the drawer. */
+export function Covers({ concepts, className = '' }: { concepts: string[]; className?: string }) {
+  const { course } = useCourse();
+  if (!concepts.length) return null;
+  return (
+    <p className={`covers ${className}`}>
+      <span className="k">Covers</span>
+      {concepts.map((c, i) => (
+        <span key={c}>
+          {i > 0 && <span className="sep"> · </span>}
+          <button className="linkish" onClick={(e) => { e.stopPropagation(); openDrawer({ kind: 'concept', id: c }); }}>{course.wiki[c]?.title ?? c}</button>
+        </span>
+      ))}
+    </p>
+  );
+}

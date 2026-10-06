@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react';
 // Hash routes: #/c/<course>/<view>/<id>/<sub>?<query>
 export interface Route {
   course?: string;
-  view: 'home' | 'lesson' | 'wiki' | 'source' | 'practice' | 'review' | 'inbox';
+  view: 'home' | 'lesson' | 'wiki' | 'source' | 'practice';
   id?: string;
   sub?: string;
   query: URLSearchParams;

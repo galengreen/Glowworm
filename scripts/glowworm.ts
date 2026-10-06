@@ -1,13 +1,9 @@
 #!/usr/bin/env tsx
 // glowworm CLI: the agent's side of the loop.
 //   pnpm glowworm validate [course]        check structure, citations, coverage and design rules
-//   pnpm glowworm inbox [--all]            list open highlight requests from the player
-//   pnpm glowworm inbox show <id>          show one request with surrounding context
-//   pnpm glowworm inbox resolve <id> "reply"   mark a request done with a reply shown in the player
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parseCourses, validateCourse, type FileMap } from '../src/course/parse';
-import { listRequests, resolveRequest } from './inbox-store';
 
 const ROOT = process.cwd();
 const COURSES = join(ROOT, 'courses');
@@ -63,37 +59,10 @@ function validate(only?: string) {
   process.exitCode = errors ? 1 : 0;
 }
 
-function inbox(args: string[]) {
-  const [sub, id, ...rest] = args;
-  if (sub === 'resolve') {
-    if (!id || !rest.length) throw new Error('Usage: glowworm inbox resolve <id> "reply"');
-    const r = resolveRequest(id, rest.join(' '));
-    console.log(`${orange('✓')} resolved ${r.id}`);
-    return;
-  }
-  if (sub === 'show') {
-    const r = listRequests().find((x) => x.id === id);
-    if (!r) throw new Error(`No request ${id}`);
-    console.log(JSON.stringify(r, null, 2));
-    console.log(dim(`\nFile: courses/${r.course}/${r.file}  ·  block #${r.block}`));
-    return;
-  }
-  const all = sub === '--all';
-  const list = listRequests().filter((r) => all || r.status === 'open');
-  if (!list.length) return console.log(dim('Inbox empty.'));
-  for (const r of list) {
-    console.log(`\n${r.status === 'open' ? orange('●') : dim('✓')} ${r.id}  ${r.intent.toUpperCase()}  ${dim(`courses/${r.course}/${r.file} #${r.block}`)}`);
-    console.log(`  “${r.quote.exact}”`);
-    if (r.note) console.log(dim(`  note: ${r.note}`));
-    if (r.reply) console.log(dim(`  reply: ${r.reply}`));
-  }
-}
-
 const [cmd, ...args] = process.argv.slice(2);
 try {
   if (cmd === 'validate') validate(args[0]);
-  else if (cmd === 'inbox') inbox(args);
-  else console.log('Usage: glowworm <validate [course] | inbox [--all | show <id> | resolve <id> "reply"]>');
+  else console.log('Usage: glowworm validate [course]');
 } catch (e) {
   console.error(red((e as Error).message));
   process.exitCode = 1;
