@@ -89,14 +89,14 @@ button.stat-row:hover .go { color: var(--accent-hi); }
 
 /* ---------- home: course map (a line-art path) ---------- */
 .map { position: relative; display: grid; gap: 8px; }
-.map-level { display: grid; grid-template-columns: 56px 1fr; gap: 20px; position: relative; }
-.map-level::before { content: ''; position: absolute; left: 27px; top: 54px; bottom: -14px; width: 1px; background: var(--line); }
+.map-level { display: grid; grid-template-columns: 40px 1fr; gap: 14px; position: relative; }
+.map-level::before { content: ''; position: absolute; left: 19.5px; top: 38px; bottom: -14px; width: 1px; background: var(--line); }
 .map-level:last-child::before { display: none; }
 .map-level.done::before { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-.map-node { width: 56px; height: 56px; position: relative; display: grid; place-items: center; }
+.map-node { width: 40px; height: 40px; position: relative; display: grid; place-items: center; }
 .map-node svg { position: absolute; inset: 0; }
-.map-node .n { font-family: var(--mono); font-size: 14px; color: var(--ink-hi); }
-.map-body { padding: 6px 0 34px; display: grid; gap: 14px; }
+.map-node .n { font-family: var(--mono); font-size: 12.5px; color: var(--ink-hi); }
+.map-body { padding: 4px 0 34px; display: grid; gap: 14px; }
 .map-body h3 { margin: 0; font-weight: 500; font-size: 22px; color: var(--ink-hi); }
 .map-body .meta { font-size: 14px; color: var(--ink-dim); margin-top: 2px; }
 .lesson-row { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; text-align: left; background: var(--panel); border: 1px solid var(--edge); border-radius: var(--radius-md); padding: 14px 18px; cursor: pointer; transition: border-color var(--dur-fast); }
@@ -363,6 +363,7 @@ textarea.field { width: 100%; min-height: 110px; resize: vertical; line-height: 
   .wiki aside { position: static; }
   .crumbs { display: none; }
   .page-head h1, .lesson-head h1 { font-size: 32px; }
+  .map-level { gap: 10px; }
 }
 
 /* calm mode + reduced motion: no animation */

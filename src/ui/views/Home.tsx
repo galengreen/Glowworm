@@ -33,7 +33,7 @@ export function Home() {
             return (
               <div key={level.id} className={`map-level${m >= MASTERY_GATE ? ' done' : ''}`}>
                 <div className="map-node">
-                  <Ring value={m} size={56} stroke={2.5}><span className="n">{pad(i + 1)}</span></Ring>
+                  <Ring value={m} size={40} stroke={2}><span className="n">{pad(i + 1)}</span></Ring>
                 </div>
                 <div className="map-body">
                   <div>
