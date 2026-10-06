@@ -397,3 +397,7 @@ textarea.field { width: 100%; min-height: 110px; resize: vertical; line-height: 
 .new-course { display: grid; gap: 8px; }
 .new-course .btn { justify-self: start; }
 .no-lessons { border: 1px solid var(--edge); border-radius: var(--radius-lg); background: radial-gradient(90% 110% at 50% 0%, var(--accent-dim), transparent 60%), var(--panel); }
+.popover-head { display: flex; justify-content: space-between; align-items: center; }
+.icon-btn { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid var(--edge); border-radius: 50%; background: none; cursor: pointer; font-family: var(--mono); font-size: 20px; line-height: 1; color: var(--ink); transition: color var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast); }
+.icon-btn:hover { color: var(--ink-hi); border-color: var(--line); }
+.icon-btn[aria-expanded='true'] { color: var(--ink-hi); border-color: var(--accent); transform: rotate(45deg); }

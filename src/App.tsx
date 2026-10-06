@@ -107,19 +107,28 @@ function usePopover() {
 
 function CourseMenu({ current, title }: { current: string; title: string }) {
   const { open, setOpen, ref } = usePopover();
+  const [adding, setAdding] = useState(false);
+  useEffect(() => setAdding(false), [open]);
   return (
     <div style={{ position: 'relative' }} ref={ref}>
       <button aria-expanded={open} onClick={() => setOpen((o) => !o)}>{title} ▾</button>
       {open && (
         <div className="popover" style={{ left: 0, right: 'auto', width: 340 }}>
-          <span className="label-sm">Courses</span>
+          <div className="popover-head">
+            <span className="label-sm">Courses</span>
+            <button className="icon-btn" aria-expanded={adding} aria-label="New course" title="New course" onClick={() => setAdding((a) => !a)}>+</button>
+          </div>
           {courses.map((c) => (
             <button key={c.root} className="linkish" style={{ justifySelf: 'start', textDecoration: courseDir(c) === current ? 'underline solid var(--accent)' : undefined }} onClick={() => { setOpen(false); go(courseDir(c)); }}>
               {c.meta.title}{c.meta.sample ? ' (sample)' : ''}
             </button>
           ))}
-          <hr />
-          <NewCourse />
+          {adding && (
+            <>
+              <hr />
+              <NewCourse />
+            </>
+          )}
         </div>
       )}
     </div>
@@ -144,7 +153,7 @@ function NewCourse() {
   return (
     <form className="new-course" onSubmit={submit}>
       <span className="label-sm">New course</span>
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. SWEN438 Software Engineering" aria-label="Course title" />
+      <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. SWEN438 Software Engineering" aria-label="Course title" />
       <input type="datetime-local" value={exam} onChange={(e) => setExam(e.target.value)} aria-label="Exam date (optional)" title="Exam date (optional)" />
       {error && <span className="error-line" role="alert">{error}</span>}
       <button className="btn small" disabled={!title.trim()}>Create course</button>
