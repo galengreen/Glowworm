@@ -14,7 +14,7 @@ export function splitFrontmatter(raw: string): { data: Record<string, unknown>; 
 
 /** `diagram: neuron` or `diagram: { widget: gradient-descent, params: { lr: 1.5 } }` */
 function parseDiagram(v: unknown): DiagramRef | undefined {
-  if (!v) return undefined;
+  if (!v || (typeof v === 'object' && 'none' in v)) return undefined;
   if (typeof v === 'string') return { widget: v, params: {} };
   const o = v as { widget?: unknown; params?: Record<string, unknown> };
   return { widget: String(o.widget ?? ''), params: Object.fromEntries(Object.entries(o.params ?? {}).map(([k, x]) => [k, String(x)])) };
@@ -102,6 +102,7 @@ export function parseCourses(files: FileMap, widgetIds: Record<string, string[]>
             prerequisites: arr(data.prerequisites),
             related: arr(data.related),
             diagram: parseDiagram(data.diagram),
+            noDiagram: typeof data.diagram === 'object' && data.diagram && 'none' in data.diagram ? String((data.diagram as { none: unknown }).none) : undefined,
             body,
           };
           course.wiki[id] = page;
@@ -170,8 +171,8 @@ export function validateCourse(course: Course, widgetSources: Record<string, str
     if (!page.sources.length) err(page.file, 'Wiki page cites no sources');
     for (const s of page.sources) if (!resolveSource(course, s)) err(page.file, `Source "${s}" not found`);
     for (const p of [...page.prerequisites, ...page.related]) if (!course.wiki[p]) err(page.file, `Links to missing wiki page "${p}"`);
-    if (!page.diagram) warn(page.file, 'No standard diagram (show, don\'t tell): add `diagram:` or justify');
-    else if (!widgets.has(page.diagram.widget)) err(page.file, `Diagram widget "${page.diagram.widget}" not found`);
+    if (!page.diagram && !page.noDiagram) warn(page.file, 'No standard diagram (show, don\'t tell): add `diagram:` or `diagram: { none: "reason" }`');
+    else if (page.diagram && !widgets.has(page.diagram.widget)) err(page.file, `Diagram widget "${page.diagram.widget}" not found`);
     const qs = Object.values(course.questions).filter((q) => q.concept === page.id);
     if (qs.length < 3) warn(page.file, `Only ${qs.length} question(s) cite this concept (want 3+)`);
     checkBody(page.file, page.body);
@@ -206,6 +207,7 @@ export function validateCourse(course: Course, widgetSources: Record<string, str
     for (const c of d.concepts) if (!course.wiki[c]) err(file, `Concept link to missing wiki page "${c}"`);
     for (const f of d.figures) if (!widgets.has(f)) err(file, `Figure uses missing widget "${f}"`);
     for (const s of d.cites) if (!resolveSource(course, s)) err(file, `Citation "${s}" not found`);
+    if (/^\s*\$\$[^\n]+\$\$\s*$/m.test(body)) warn(file, 'Display maths must put $$ on their own lines, or it renders inline');
     return d;
   }
 

@@ -10,8 +10,9 @@ diagram:
   params: { lr: 0.5 }
 ---
 
-$$w \leftarrow w - \eta \, \frac{\partial L}{\partial w}$$
-
+$$
+w \leftarrow w - \eta \, \frac{\partial L}{\partial w}
+$$
 The :concept[gradient]{id=gradient} points uphill, so subtracting it moves downhill. The :concept[learning rate]{id=learning-rate} $\eta$ scales the step. Near the minimum the slope shrinks, so the steps shrink too. :cite[notes §7]{src=notes#gradient-descent}
 
 ### Worked example

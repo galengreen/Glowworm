@@ -34,6 +34,8 @@ kbd { font-family: var(--mono); font-size: 11.5px; color: var(--ink); border: 1p
 .chip .n { font-family: var(--mono); font-size: 12px; color: var(--accent-hi); }
 .chip.live { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-dim); color: var(--ink-hi); }
 .chip kbd { margin-left: 2px; }
+.chip.current { border-color: var(--line); background: var(--deck); color: var(--ink-hi); }
+.chip .n.dim { color: var(--ink-dim); }
 .progress-line { position: absolute; left: 0; bottom: -1px; height: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); transition: width var(--dur) var(--ease); }
 
 /* ---------- buttons ---------- */
@@ -126,6 +128,8 @@ kbd { font-family: var(--mono); font-size: 11.5px; color: var(--ink); border: 1p
 .prose strong { color: var(--ink-hi); font-weight: 600; }
 .prose em { color: var(--ink-hi); }
 .prose code { font-family: var(--mono); font-size: 0.85em; background: var(--recess); border: 1px solid var(--edge); border-radius: 5px; padding: 1px 5px; }
+.prose pre { background: var(--recess); border: 1px solid var(--edge); border-radius: var(--radius-md); padding: 14px 16px; overflow-x: auto; margin: 0 0 1.2em; line-height: 1.55; }
+.prose pre code { background: none; border: 0; padding: 0; font-size: 0.82em; color: var(--ink-hi); }
 .prose ul, .prose ol { padding-left: 1.3em; margin: 0 0 1em; }
 .prose li { margin: 0.3em 0; }
 .prose h1 { font-weight: 500; color: var(--ink-hi); font-size: 30px; letter-spacing: -0.01em; }
@@ -134,7 +138,7 @@ kbd { font-family: var(--mono); font-size: 11.5px; color: var(--ink); border: 1p
 .prose table { border-collapse: collapse; font-size: 0.92em; margin: 0.4em 0 1.2em; width: 100%; }
 .prose th, .prose td { border-bottom: 1px solid var(--edge); padding: 9px 14px 9px 0; text-align: left; vertical-align: top; }
 .prose th { font-weight: 500; font-size: 13px; color: var(--ink-dim); }
-.prose .katex { font-size: 1.05em; color: var(--ink-hi); }
+.prose .katex { font-size: 1.05em; color: var(--ink-hi); letter-spacing: 0; word-spacing: 0; }
 .prose .katex-display { margin: 1.2em 0; overflow-x: auto; overflow-y: hidden; }
 .prose blockquote { margin: 0 0 1em; padding: 2px 0 2px 16px; border-left: 2px solid var(--line); color: var(--ink); }
 
@@ -220,6 +224,7 @@ kbd { font-family: var(--mono); font-size: 11.5px; color: var(--ink); border: 1p
 .question .prompt p:last-child { margin: 0; }
 .choices { display: grid; gap: 8px; }
 .choice { display: flex; gap: 14px; align-items: flex-start; text-align: left; font-size: 16px; line-height: 1.45; color: var(--ink-read); background: var(--bg); border: 1px solid var(--edge); border-radius: var(--radius-md); padding: 12px 16px; cursor: pointer; transition: border-color var(--dur-fast), background var(--dur-fast); }
+.choice p { margin: 0; }
 .choice .k { font-family: var(--mono); font-size: 12.5px; color: var(--ink-dim); width: 20px; height: 20px; flex: none; display: grid; place-items: center; border: 1px solid var(--edge); border-radius: 6px; margin-top: 1px; }
 .choice:hover:not(:disabled) { border-color: var(--line); }
 .choice.correct { border-color: var(--accent); background: var(--accent-dim); color: var(--ink-hi); }

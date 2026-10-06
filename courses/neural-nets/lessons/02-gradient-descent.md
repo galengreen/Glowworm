@@ -28,7 +28,9 @@ A negative slope means increasing $w$ *lowers* the loss, so we should move right
 ## Step downhill {#gd-update}
 
 :::callout{type=key}
-$$w \leftarrow w - \eta \, \frac{\partial L}{\partial w}$$
+$$
+w \leftarrow w - \eta \, \frac{\partial L}{\partial w}
+$$
 Move **against** the gradient, scaled by the learning rate $\eta$. :cite[notes §7]{src=notes#gradient-descent}
 :::
 

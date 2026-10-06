@@ -4,7 +4,7 @@ import { markMcq, markNumeric, shortMarker, shortMax, type MarkResult } from '..
 import { useCourse } from '../render/context';
 import { Md } from '../render/Md';
 import { recordAttempt, useProgress } from '../state/progress';
-import { openDrawer, sourceItem } from '../state/ui';
+import { openDrawer, sourceItem, sourceLabel } from '../state/ui';
 
 interface Props {
   q: Question;
@@ -201,7 +201,7 @@ export function QuestionCard({ q, mode, onNext, keyboard }: Props) {
           <div className="q-foot">
             <div className="links">
               {concept && <button className="linkish" onClick={() => openDrawer({ kind: 'concept', id: concept.id })}>Read more: {concept.title}</button>}
-              {concept?.sources.map((s) => <button key={s} className="cite" onClick={() => openDrawer(sourceItem(s))}>{s}</button>)}
+              {concept?.sources.map((s) => <button key={s} className="cite" onClick={() => openDrawer(sourceItem(s))}>{sourceLabel(course, s)}</button>)}
             </div>
             <div className="row">
               {mode === 'recall' && <button className="btn small ghost" onClick={reset}>Try again</button>}

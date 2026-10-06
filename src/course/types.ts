@@ -41,6 +41,7 @@ export interface WikiPage {
   prerequisites: string[];
   related: string[];
   diagram?: DiagramRef; // the concept's standard diagram
+  noDiagram?: string; // why this concept has no diagram (`diagram: { none: "reason" }`)
   body: string;
 }
 

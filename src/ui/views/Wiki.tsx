@@ -5,10 +5,10 @@ import { Figure } from '../../render/Figure';
 import { Md } from '../../render/Md';
 import { conceptMastery, useProgress } from '../../state/progress';
 import { go } from '../../state/router';
-import { closeDrawer, openDrawer, sourceItem } from '../../state/ui';
+import { closeDrawer, openDrawer, sourceItem, sourceLabel } from '../../state/ui';
 import { Ring } from '../bits';
 
-/** Prerequisites first, so the index reads in learning order. */
+/** Learning order: the order concepts are taught in the lessons, with prerequisites first. */
 export function orderedConcepts(course: Course): WikiPage[] {
   const out: WikiPage[] = [];
   const seen = new Set<string>();
@@ -18,7 +18,8 @@ export function orderedConcepts(course: Course): WikiPage[] {
     course.wiki[id].prerequisites.forEach(visit);
     out.push(course.wiki[id]);
   };
-  Object.keys(course.wiki).sort().forEach(visit);
+  const taught = course.meta.levels.flatMap((l) => l.lessons).flatMap((id) => course.lessons[id]?.concepts ?? []);
+  [...taught, ...Object.keys(course.wiki).sort()].forEach(visit);
   return out;
 }
 
@@ -65,7 +66,7 @@ function Facts({ page, inDrawer }: { page: WikiPage; inDrawer?: boolean }) {
     ));
 
   const groups: [string, React.ReactNode][] = [
-    ['Sources', page.sources.map((s) => <button key={s} className="cite" style={{ marginLeft: 0 }} onClick={() => openDrawer(sourceItem(s))}>{s}</button>)],
+    ['Sources', page.sources.map((s) => <button key={s} className="cite" style={{ marginLeft: 0 }} onClick={() => openDrawer(sourceItem(s))}>{sourceLabel(course, s)}</button>)],
     ['Builds on', page.prerequisites.length ? links(page.prerequisites) : null],
     ['Needed for', neededFor.length ? links(neededFor.map((n) => n.id)) : null],
     ['Related', page.related.length ? links(page.related) : null],

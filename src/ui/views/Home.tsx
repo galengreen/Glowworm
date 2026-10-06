@@ -55,7 +55,10 @@ export function Home() {
       </div>
 
       <div className="section">
-        <span className="label-sm">Course map</span>
+        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 16 }}>
+          <span className="label-sm">Course map</span>
+          <button className="linkish" style={{ fontSize: 14 }} onClick={() => go(dir, 'wiki')}>Browse all {Object.keys(course.wiki).length} concepts →</button>
+        </div>
         <div className="map">
           {course.meta.levels.map((level, i) => {
             const m = levelMastery(course, p, level.id);

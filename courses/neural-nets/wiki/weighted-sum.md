@@ -10,8 +10,9 @@ diagram:
   params: { x1: 1, x2: 1 }
 ---
 
-$$z = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b = \mathbf{w} \cdot \mathbf{x} + b$$
-
+$$
+z = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b = \mathbf{w} \cdot \mathbf{x} + b
+$$
 | Weight | Effect of that input |
 |---|---|
 | Large positive | Pushes $z$ up strongly |

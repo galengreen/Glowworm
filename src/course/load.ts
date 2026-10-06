@@ -20,4 +20,12 @@ export const courses: Course[] = parsed.courses;
 export const issues: Issue[] = [...parsed.issues, ...parsed.courses.flatMap((c) => validateCourse(c))];
 
 export const courseDir = (course: Course) => course.root.replace('/courses/', '');
-export const findCourse = (id: string | undefined) => courses.find((c) => courseDir(c) === id) ?? courses[0];
+const LAST = 'learnsmart:last-course';
+
+/** The requested course, else the last one opened, else the first real (non-sample) course. */
+export function findCourse(id: string | undefined) {
+  const byId = (d: string | null | undefined) => courses.find((c) => courseDir(c) === d);
+  const course = byId(id) ?? byId(localStorage.getItem(LAST)) ?? courses.find((c) => !c.meta.sample) ?? courses[0];
+  if (course) localStorage.setItem(LAST, courseDir(course));
+  return course;
+}

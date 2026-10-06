@@ -1,5 +1,6 @@
 // Transient UI state: the side drawer (concepts and sources open beside the lesson) and the command palette.
 import { useSyncExternalStore } from 'react';
+import type { Course } from '../course/types';
 import { createStore } from './store';
 
 export type DrawerItem = { kind: 'concept'; id: string } | { kind: 'source'; id: string; anchor?: string };
@@ -22,3 +23,10 @@ export const sourceItem = (ref: string): DrawerItem => {
   const [id, anchor] = ref.split('#');
   return { kind: 'source', id, anchor };
 };
+
+/** "intro#slide-26" → "Intro · slide 26" */
+export function sourceLabel(course: Course, ref: string) {
+  const [id, anchor] = ref.split('#');
+  const title = course.sources[id]?.title ?? id;
+  return anchor ? `${title} · ${anchor.replace(/-/g, ' ')}` : title;
+}

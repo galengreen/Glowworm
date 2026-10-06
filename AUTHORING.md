@@ -41,6 +41,8 @@ diagram:                           # the concept's standard diagram (show, don't
 ---
 ```
 
+If a concept genuinely can't be shown (e.g. a checklist), write `diagram: { none: "why" }` instead. The validator accepts it, but the reason should hold up.
+
 Keep pages short: definition, key explanation, worked example, common misconceptions. Use the same terms and notation as the sources.
 
 ## Lessons
@@ -62,7 +64,7 @@ Keep pages short: definition, key explanation, worked example, common misconcept
 | `:::callout{type=key\|why\|note\|exam}` … `:::` | Key idea, why it matters, note, exam tip |
 | `:::steps` + ordered list + `:::` | Worked example revealed one step at a time |
 
-Maths: `$inline$` and `$$display$$` (KaTeX). Tables: GitHub-flavoured Markdown.
+Maths: `$inline$`, and display maths with `$$` on their own lines (a one-line `$$…$$` renders inline). KaTeX. Tables: GitHub-flavoured Markdown.
 
 ## Questions
 
@@ -89,6 +91,7 @@ Maths: `$inline$` and `$$display$$` (KaTeX). Tables: GitHub-flavoured Markdown.
   model: A model answer
 ```
 
+- **Quote free-text values** (`prompt: 'Why …?'`, and list items like hints and choices). A colon or a leading quote inside unquoted text breaks YAML. Use `|` blocks for multi-line prompts.
 - At least **3 questions per concept**, mixing types. Calibrate exam-style questions against past papers when the sources include them.
 - Wrong choices should be real misconceptions, not filler.
 - Mark schemes are lists of separately checkable points, so they can be marked one point at a time (by you, or later by Jev).

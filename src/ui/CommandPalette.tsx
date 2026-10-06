@@ -1,5 +1,6 @@
 // ⌘K / Ctrl+K / "/": jump to any lesson, concept or study mode.
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { courseDir, courses } from '../course/load';
 import { useCourse } from '../render/context';
 import { go } from '../state/router';
 import { openDrawer, setPalette, useUi } from '../state/ui';
@@ -45,6 +46,7 @@ export function CommandPalette() {
       { label: 'Review due questions', kind: 'Study', run: () => go(dir, 'review') },
       { label: 'All concepts', kind: 'Go', run: () => go(dir, 'wiki') },
       { label: 'Inbox', kind: 'Go', run: () => go(dir, 'inbox') },
+      ...courses.filter((c) => courseDir(c) !== dir).map((c) => ({ label: `Switch to ${c.meta.title}`, kind: 'Course', run: () => go(courseDir(c)) })),
       ...order.map((id, i) => ({ label: `${i + 1}. ${course.lessons[id].title}`, kind: 'Lesson', run: () => go(dir, 'lesson', id) })),
       ...Object.values(course.wiki).map((w) => ({ label: w.title, kind: 'Concept', run: () => openDrawer({ kind: 'concept', id: w.id }) })),
       ...Object.values(course.wiki).map((w) => ({ label: `Practise: ${w.title}`, kind: 'Quiz', run: () => go(dir, 'practice', undefined, undefined, { concepts: w.id }) })),

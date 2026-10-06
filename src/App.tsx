@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { DEFS } from '@kit';
-import { courseDir, findCourse } from './course/load';
+import { courseDir, courses, findCourse } from './course/load';
 import type { Course } from './course/types';
 import { CourseContext } from './render/context';
 import { useInbox } from './state/inbox';
@@ -68,7 +68,7 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
       <a className="brand" href={href(dir)}><span className="dot" />LearnSmart</a>
       <nav className="crumbs" aria-label="Breadcrumb">
         <span className="sep">/</span>
-        <a href={href(dir)}>{course.meta.title}</a>
+        <CourseMenu current={dir} title={course.meta.title} />
         {route.view === 'wiki' && route.id && (
           <>
             <span className="sep">/</span>
@@ -83,6 +83,9 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
         )}
       </nav>
       <span className="spacer" />
+      <button className={`chip${route.view === 'wiki' ? ' current' : ''}`} onClick={() => go(dir, 'wiki')} title="Every concept in the course (the wiki)">
+        Concepts<span className="n dim">{Object.keys(course.wiki).length}</span>
+      </button>
       <button className={`chip${due ? ' live' : ''}`} onClick={() => go(dir, 'review')} title="Questions due for spaced review">
         Review{due > 0 && <span className="n">{due}</span>}
       </button>
@@ -98,17 +101,41 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
   );
 }
 
-function Settings({ dir }: { dir: string }) {
-  const s = useSettings();
+function usePopover() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
+  return { open, setOpen, ref };
+}
+
+function CourseMenu({ current, title }: { current: string; title: string }) {
+  const { open, setOpen, ref } = usePopover();
+  if (courses.length < 2) return <a href={href(current)}>{title}</a>;
+  return (
+    <div style={{ position: 'relative' }} ref={ref}>
+      <button aria-expanded={open} onClick={() => setOpen((o) => !o)}>{title} ▾</button>
+      {open && (
+        <div className="popover" style={{ left: 0, right: 'auto', width: 340 }}>
+          <span className="label-sm">Courses</span>
+          {courses.map((c) => (
+            <button key={c.root} className="linkish" style={{ justifySelf: 'start', textDecoration: courseDir(c) === current ? 'underline solid var(--accent)' : undefined }} onClick={() => { setOpen(false); go(courseDir(c)); }}>
+              {c.meta.title}{c.meta.sample ? ' (sample)' : ''}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Settings({ dir }: { dir: string }) {
+  const s = useSettings();
+  const { open, setOpen, ref } = usePopover();
 
   return (
     <div style={{ position: 'relative' }} ref={ref}>

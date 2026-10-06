@@ -33,7 +33,7 @@ function load() {
     if (/\.(md|ya?ml)$/.test(abs)) files[rel] = readFileSync(abs, 'utf8');
     if (/\/widgets\/[^/]+\.ts$/.test(rel)) {
       const src = readFileSync(abs, 'utf8');
-      const id = /\bid:\s*['"]([\w-]+)['"]/.exec(src)?.[1];
+      const id = /defineWidget\(\s*\{\s*id:\s*['"]([\w-]+)['"]/.exec(src)?.[1];
       if (id) (widgetIds[dir] ??= []).push(id);
       (widgetSources[dir] ??= {})[rel.replace(`/courses/${dir}/`, '')] = src;
     }
