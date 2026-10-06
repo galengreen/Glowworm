@@ -6,7 +6,7 @@ import { addRequest, listRequests } from './scripts/inbox-store';
 // Serves the file inbox to the player: GET lists requests, POST adds one.
 function inbox(): Plugin {
   return {
-    name: 'learnsmart-inbox',
+    name: 'glowworm-inbox',
     configureServer(server) {
       server.middlewares.use('/api/inbox', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
@@ -39,5 +39,5 @@ export default defineConfig({
   resolve: {
     alias: { '@kit': fileURLToPath(new URL('./src/kit/index.ts', import.meta.url)) },
   },
-  server: { watch: { ignored: ['**/.learnsmart/**'] } },
+  server: { watch: { ignored: ['**/.glowworm/**'] } },
 });

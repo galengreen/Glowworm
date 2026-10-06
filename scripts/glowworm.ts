@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
-// learnsmart CLI: the agent's side of the loop.
-//   pnpm learnsmart validate [course]        check structure, citations, coverage and design rules
-//   pnpm learnsmart inbox [--all]            list open highlight requests from the player
-//   pnpm learnsmart inbox show <id>          show one request with surrounding context
-//   pnpm learnsmart inbox resolve <id> "reply"   mark a request done with a reply shown in the player
+// glowworm CLI: the agent's side of the loop.
+//   pnpm glowworm validate [course]        check structure, citations, coverage and design rules
+//   pnpm glowworm inbox [--all]            list open highlight requests from the player
+//   pnpm glowworm inbox show <id>          show one request with surrounding context
+//   pnpm glowworm inbox resolve <id> "reply"   mark a request done with a reply shown in the player
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parseCourses, validateCourse, type FileMap } from '../src/course/parse';
@@ -66,7 +66,7 @@ function validate(only?: string) {
 function inbox(args: string[]) {
   const [sub, id, ...rest] = args;
   if (sub === 'resolve') {
-    if (!id || !rest.length) throw new Error('Usage: learnsmart inbox resolve <id> "reply"');
+    if (!id || !rest.length) throw new Error('Usage: glowworm inbox resolve <id> "reply"');
     const r = resolveRequest(id, rest.join(' '));
     console.log(`${orange('✓')} resolved ${r.id}`);
     return;
@@ -93,7 +93,7 @@ const [cmd, ...args] = process.argv.slice(2);
 try {
   if (cmd === 'validate') validate(args[0]);
   else if (cmd === 'inbox') inbox(args);
-  else console.log('Usage: learnsmart <validate [course] | inbox [--all | show <id> | resolve <id> "reply"]>');
+  else console.log('Usage: glowworm <validate [course] | inbox [--all | show <id> | resolve <id> "reply"]>');
 } catch (e) {
   console.error(red((e as Error).message));
   process.exitCode = 1;

@@ -20,7 +20,7 @@ export const courses: Course[] = parsed.courses;
 export const issues: Issue[] = [...parsed.issues, ...parsed.courses.flatMap((c) => validateCourse(c))];
 
 export const courseDir = (course: Course) => course.root.replace('/courses/', '');
-const LAST = 'learnsmart:last-course';
+const LAST = 'glowworm:last-course';
 
 /** The requested course, else the last one opened, else the first real (non-sample) course. */
 export function findCourse(id: string | undefined) {

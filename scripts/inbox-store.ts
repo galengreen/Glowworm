@@ -19,7 +19,7 @@ export interface InboxRequest {
   resolvedAt?: string;
 }
 
-export const INBOX_DIR = join(process.cwd(), '.learnsmart', 'inbox');
+export const INBOX_DIR = join(process.cwd(), '.glowworm', 'inbox');
 
 function ensure() {
   if (!existsSync(INBOX_DIR)) mkdirSync(INBOX_DIR, { recursive: true });

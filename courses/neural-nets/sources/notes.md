@@ -1,6 +1,6 @@
 # How a neural network learns: lecture notes
 
-> **Sample source.** Written for the LearnSmart prototype so the citation chain (question → wiki → source) has something real to point at. Replace with actual course material (slides, notes, past papers).
+> **Sample source.** Written for the Glowworm prototype so the citation chain (question → wiki → source) has something real to point at. Replace with actual course material (slides, notes, past papers).
 
 ## Artificial neurons
 

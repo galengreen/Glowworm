@@ -1,8 +1,8 @@
-# Authoring a LearnSmart course
+# Authoring a Glowworm course
 
 Conventions for any agent (Claude Code, Codex, …) that writes or edits a course. Read [PRODUCT.md](PRODUCT.md) for the why; this file is the how.
 
-**Loop:** read the sources → write wiki pages → write lessons, widgets and questions → `pnpm learnsmart validate` until it passes → check the result in the player (`pnpm dev`) → work through `pnpm learnsmart inbox`.
+**Loop:** read the sources → write wiki pages → write lessons, widgets and questions → `pnpm glowworm validate` until it passes → check the result in the player (`pnpm dev`) → work through `pnpm glowworm inbox`.
 
 ## Folder layout
 
@@ -127,9 +127,9 @@ export default defineWidget({
 The user highlights text in the player and sends a request. Work through them at the start of each session:
 
 ```sh
-pnpm learnsmart inbox                     # open requests
-pnpm learnsmart inbox show <id>           # full request: file, block id, quote with surrounding text
-pnpm learnsmart inbox resolve <id> "what you changed"
+pnpm glowworm inbox                     # open requests
+pnpm glowworm inbox show <id>           # full request: file, block id, quote with surrounding text
+pnpm glowworm inbox resolve <id> "what you changed"
 ```
 
 | Intent | What to do |

@@ -11,7 +11,7 @@ export function InboxView() {
         <span className="label-sm">Agent inbox</span>
         <h1>Inbox</h1>
         <p className="lede">
-          Highlight any text and send it here. Your agent works through open requests with <code>pnpm learnsmart inbox</code> and replies when it's done.
+          Highlight any text and send it here. Your agent works through open requests with <code>pnpm glowworm inbox</code> and replies when it's done.
         </p>
       </div>
       {!items.length && <p className="muted">Nothing here yet. Select some text in a lesson to try it.</p>}

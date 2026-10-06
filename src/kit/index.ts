@@ -1,4 +1,4 @@
-// LearnSmart widget kit. Widgets import everything from '@kit' and style only with tokens (var(--…)).
+// Glowworm widget kit. Widgets import everything from '@kit' and style only with tokens (var(--…)).
 export { frame, project } from './iso';
 export type { IsoKernel, Vec3 } from './iso';
 

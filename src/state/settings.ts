@@ -15,7 +15,7 @@ export interface Settings {
   calm: boolean;
 }
 
-const KEY = 'learnsmart:settings';
+const KEY = 'glowworm:settings';
 const saved = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<Settings> | null;
 export const settings = createStore<Settings>({ accent: 0, spacing: 'normal', calm: false, ...saved });
 

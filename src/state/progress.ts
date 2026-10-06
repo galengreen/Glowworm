@@ -23,7 +23,7 @@ export interface CourseProgress {
 
 type AllProgress = Record<string, CourseProgress>;
 
-const KEY = 'learnsmart:progress:v1';
+const KEY = 'glowworm:progress:v1';
 const empty = (): CourseProgress => ({ attempts: {}, cards: {}, segments: {}, predictions: {} });
 
 function revive(all: AllProgress): AllProgress {

@@ -1,6 +1,6 @@
-# LearnSmart: Product Summary
+# Glowworm: Product Summary
 
-*Working name. McGraw Hill already has a product called LearnSmart.*
+*Named after the glowworms of Aotearoa, whose glowing threads in the dark inspired the look.*
 
 ## One-liner
 
@@ -24,10 +24,10 @@ The product has three parts. The AI isn't one of them; you bring your own.
 | Part | What it is |
 |---|---|
 | **Course format** | A folder of plain files: a wiki-style knowledge base, Markdown lessons with components (diagrams, maths, charts, quizzes, widgets), YAML question banks with mark schemes, and a map of learning objectives. Shareable as a zip or git repo. |
-| **Authoring kit** | A conventions doc or skill that any coding agent (Claude Code, Codex, …) follows, a design system and widget kit, plus a `learnsmart` CLI that validates structure, citations, coverage and design, renders screenshots, and manages the request inbox. |
+| **Authoring kit** | A conventions doc or skill that any coding agent (Claude Code, Codex, …) follows, a design system and widget kit, plus a `glowworm` CLI that validates structure, citations, coverage and design, renders screenshots, and manages the request inbox. |
 | **Player** | A local app that shows courses, runs quizzes, marks answers, tracks mastery, schedules review, and sends highlighted text back to the agent. |
 
-**Workflow:** put slides, notes and past papers in a folder → your agent extracts the learning objectives → it builds the knowledge base → it generates levels, lessons and questions from the knowledge base → `learnsmart validate` reports gaps until the course passes → you study in the player → whatever you highlight and ask about goes to the inbox, and the agent works through it.
+**Workflow:** put slides, notes and past papers in a folder → your agent extracts the learning objectives → it builds the knowledge base → it generates levels, lessons and questions from the knowledge base → `glowworm validate` reports gaps until the course passes → you study in the player → whatever you highlight and ask about goes to the inbox, and the agent works through it.
 
 ## Knowledge base
 
@@ -62,8 +62,8 @@ Highlight any text (in a lesson, a wiki page, a question, or feedback on your an
 
 How it works without building AI into the player:
 
-1. The player writes a request to `.learnsmart/inbox/`. The request records the file, a stable block ID, the exact quote plus the text either side (so it still finds its place if content moves), the intent, and your note.
-2. The agent reads the inbox (`learnsmart inbox`), makes the changes, and marks each request done with a short reply.
+1. The player writes a request to `.glowworm/inbox/`. The request records the file, a stable block ID, the exact quote plus the text either side (so it still finds its place if content moves), the intent, and your note.
+2. The agent reads the inbox (`glowworm inbox`), makes the changes, and marks each request done with a short reply.
 3. The player shows the reply next to the original highlight, and the changed content is marked as updated.
 4. You can also copy a highlight as a formatted reference and paste it straight into an agent chat.
 
@@ -176,9 +176,9 @@ Every custom widget should meet this checklist:
 2. **Predict first:** ask "what do you think happens if…?" before the user plays
 3. A short prompt for what to try, and a recall question afterwards
 4. Works with the keyboard, has a reduced-motion fallback, and passes a contrast check. Uses the line language; teaching labels face the screen; any WebGL stays within the frame-time budget with a static SVG fallback
-5. Uses tokens only, with no hard-coded colours or fonts. The design checks in `learnsmart validate` enforce this.
+5. Uses tokens only, with no hard-coded colours or fonts. The design checks in `glowworm validate` enforce this.
 
-**Feedback loop:** `learnsmart preview --screenshot` renders any lesson or widget headlessly, so the agent can *see* its work and refine it. Good custom widgets can be promoted into the premade library.
+**Feedback loop:** `glowworm preview --screenshot` renders any lesson or widget headlessly, so the agent can *see* its work and refine it. Good custom widgets can be promoted into the premade library.
 
 ## The learning model
 
@@ -222,7 +222,7 @@ This matches the research on pictures and words: people learn more from words *a
 
 ### Enforced, not hoped for
 
-`learnsmart validate` flags long blocks of text with no visual, and wiki concepts that don't have a standard diagram. The agent then has to add one or record a short reason why the content can't be shown.
+`glowworm validate` flags long blocks of text with no visual, and wiki concepts that don't have a standard diagram. The agent then has to add one or record a short reason why the content can't be shown.
 
 ## Marking
 
@@ -254,11 +254,11 @@ This matches the research on pictures and words: people learn more from words *a
 
 ## MVP milestones
 
-> **Status (6 Oct 2026):** a working prototype covers most of milestone 1 and parts of 2–3: the player, the course format, the widget kit with two sample widgets, the highlight → inbox loop, and `learnsmart validate`. See [README.md](README.md).
+> **Status (6 Oct 2026):** a working prototype covers most of milestone 1 and parts of 2–3: the player, the course format, the widget kit with two sample widgets, the highlight → inbox loop, and `glowworm validate`. See [README.md](README.md).
 
 1. Dark-mode tokens and the line language; the isometric helper and SVG diagram primitives; format spec (including wiki pages and stable block IDs); conventions doc; and a player with lessons, wiki pages, about 8 core components, deterministic quizzes and progress stored locally.
-2. Widget kit and `learnsmart preview --screenshot`. One AIML431 topic generated end to end (sources → wiki → lessons, widgets and questions), then used for real.
-3. `learnsmart validate` (including design checks), highlight-to-inbox with `learnsmart inbox`, and spaced review.
+2. Widget kit and `glowworm preview --screenshot`. One AIML431 topic generated end to end (sources → wiki → lessons, widgets and questions), then used for real.
+3. `glowworm validate` (including design checks), highlight-to-inbox with `glowworm inbox`, and spaced review.
 4. Jev marking with an LLM fallback, per-concept mastery, and the level map with its moments.
 5. Both courses fully covered in time for the exams.
 

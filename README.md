@@ -1,4 +1,4 @@
-# LearnSmart
+# Glowworm
 
 Bring your own AI, give it your course material, and get levelled lessons with interactive diagrams, exam-style practice and spaced review. See [PRODUCT.md](PRODUCT.md) for the idea and [AUTHORING.md](AUTHORING.md) for the course format.
 
@@ -9,8 +9,8 @@ Bring your own AI, give it your course material, and get levelled lessons with i
 ```sh
 pnpm install
 pnpm dev                          # player at http://localhost:5173
-pnpm learnsmart validate          # check every course
-pnpm learnsmart inbox             # requests sent from the player
+pnpm glowworm validate          # check every course
+pnpm glowworm inbox             # requests sent from the player
 pnpm typecheck
 ```
 
@@ -21,9 +21,9 @@ pnpm typecheck
 - **Widget kit** (`src/kit`): an isometric projection helper, flat 2D helpers, shared glow filters, and an interaction API (`flash`, `replay`, `loop`, `controls`, `params`). Two sample widgets: an isometric neuron with signal pulses, and gradient descent with a learning-rate slider.
 - **Predict first:** figures with a `predict` attribute stay hidden until you lock in a prediction.
 - **Marking:** multiple choice and numeric questions are marked automatically; written answers are self-marked against the mark scheme for now (`src/marking.ts` is where Jev and an LLM fallback plug in).
-- **Highlight → inbox:** select any text and send it with an intent. Requests are saved to `.learnsmart/inbox/`, and agents resolve them with the CLI.
+- **Highlight → inbox:** select any text and send it with an intent. Requests are saved to `.glowworm/inbox/`, and agents resolve them with the CLI.
 - **Validator:** checks the citation chain, missing references, question coverage, long text with no figure, and hard-coded colours in widgets.
 
 ## Not yet
 
-Jev and LLM marking, `learnsmart preview --screenshot`, the level map and moments, Electron packaging, sandboxed iframes for untrusted widgets (sample widgets run in-page), and importing PDFs or slides into `sources/`.
+Jev and LLM marking, `glowworm preview --screenshot`, the level map and moments, Electron packaging, sandboxed iframes for untrusted widgets (sample widgets run in-page), and importing PDFs or slides into `sources/`.

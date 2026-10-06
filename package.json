@@ -1,5 +1,5 @@
 {
-  "name": "learnsmart",
+  "name": "glowworm",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "learnsmart": "tsx scripts/learnsmart.ts"
+    "glowworm": "tsx scripts/glowworm.ts"
   },
   "dependencies": {
     "@fontsource/dm-mono": "^5.3.0",

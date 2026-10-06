@@ -11,7 +11,7 @@ const TAGS: Record<string, string> = {
   steps: 'ls-steps',
 };
 
-export function remarkLearnsmart() {
+export function remarkGlowworm() {
   return (tree: Root) => {
     visit(tree, (node, index, parent) => {
       if (node.type !== 'containerDirective' && node.type !== 'leafDirective' && node.type !== 'textDirective') return;

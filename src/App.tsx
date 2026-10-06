@@ -65,7 +65,7 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
 
   return (
     <header className="topbar">
-      <a className="brand" href={href(dir)}><span className="dot" />LearnSmart</a>
+      <a className="brand" href={href(dir)}><span className="dot" />Glowworm</a>
       <nav className="crumbs" aria-label="Breadcrumb">
         <span className="sep">/</span>
         <CourseMenu current={dir} title={course.meta.title} />

@@ -9,7 +9,7 @@ import { openDrawer, sourceItem } from '../state/ui';
 import { QuestionCard } from '../ui/QuestionCard';
 import { useCourse } from './context';
 import { Figure } from './Figure';
-import { remarkLearnsmart } from './remarkLearnsmart';
+import { remarkGlowworm } from './remarkGlowworm';
 
 type P = Record<string, string | undefined> & { children?: ReactNode };
 
@@ -114,7 +114,7 @@ export function Md({ source, className = 'prose' }: { source: string; className?
   return (
     <div className={className}>
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath, remarkDirective, remarkLearnsmart]}
+        remarkPlugins={[remarkGfm, remarkMath, remarkDirective, remarkGlowworm]}
         rehypePlugins={[rehypeKatex, rehypeSlug]}
         components={components}
       >

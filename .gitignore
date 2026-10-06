@@ -1,6 +1,6 @@
 node_modules
 dist
-.learnsmart/
+.glowworm/
 .DS_Store
 
 # Real course material is copyrighted: keep it out of the repo (only the sample course is committed)

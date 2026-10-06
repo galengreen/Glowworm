@@ -1,6 +1,6 @@
 id: neural-nets
 title: How a neural network learns
-subtitle: From a single neuron to learning by gradient descent. A sample course for the LearnSmart prototype.
+subtitle: From a single neuron to learning by gradient descent. A sample course for the Glowworm prototype.
 sample: true
 levels:
   - id: neuron
