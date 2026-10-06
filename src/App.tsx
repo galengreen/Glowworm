@@ -5,7 +5,7 @@ import type { Course } from './course/types';
 import { CourseContext } from './render/context';
 import { lessonProgress, resetProgress, useProgress } from './state/progress';
 import { go, href, useRoute, type Route } from './state/router';
-import { ACCENTS, settings, useSettings } from './state/settings';
+import { ACCENTS, THEMES, settings, useSettings } from './state/settings';
 import { closeDrawer, setPalette } from './state/ui';
 import { CommandPalette } from './ui/CommandPalette';
 import { Drawer } from './ui/Drawer';
@@ -128,6 +128,14 @@ function Settings({ dir }: { dir: string }) {
       <button className="chip" aria-expanded={open} onClick={() => setOpen((o) => !o)}>Settings</button>
       {open && (
         <div className="popover">
+          <span className="label-sm">Theme</span>
+          <div className="segmented" role="radiogroup" aria-label="Theme">
+            {THEMES.map((t) => (
+              <button key={t} role="radio" aria-checked={s.theme === t} onClick={() => settings.set({ ...s, theme: t })}>
+                {t[0].toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
           <span className="label-sm">Accent</span>
           <div className="swatches" role="radiogroup" aria-label="Accent colour">
             {ACCENTS.map((a, i) => (

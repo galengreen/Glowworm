@@ -1,4 +1,5 @@
-/* Design tokens. Dark mode only for now; names are semantic so a light set can be swapped in later. */
+/* Design tokens. Dark is the default set; [data-theme='light'] swaps the colours. Names are semantic, so
+   course content styled with tokens follows the theme without any changes. */
 :root {
   color-scheme: dark;
 
@@ -23,10 +24,14 @@
   --accent: #ff7a1a;
   --accent-hi: #ffb070;
   --accent-dim: color-mix(in srgb, var(--accent) 10%, transparent);
-  --glass-on: color-mix(in srgb, var(--accent) 9%, #101112);
+  --glass-on: color-mix(in srgb, var(--accent) 9%, var(--glass));
 
   /* reserved, muted: incorrect (always paired with an icon) */
   --miss: #e08a8a;
+
+  /* elevation */
+  --shadow: rgba(0, 0, 0, 0.55);
+  --scrim: rgba(0, 0, 0, 0.45);
 
   /* type */
   --mono: 'DM Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -46,6 +51,34 @@
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --dur-fast: 0.16s;
   --dur: 0.4s;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  /* surfaces: lit from above, so isometric tops are lighter than sides */
+  --bg: #f5f4f1;
+  --panel: #ffffff;
+  --edge: #e2e0db;
+  --body: #e4e1dc;
+  --deck: #f2f0ec;
+  --recess: #ebe9e5;
+  --glass: #f3f2ef;
+
+  --detail: #d3d0ca;
+  --line: #aeaaa3;
+  --ink-dim: #6a6761; /* 5.6:1 on panel */
+  --ink: #4a4743; /* 9:1 */
+  --ink-read: #2b2926; /* 14:1 */
+  --ink-hi: #161513; /* 18:1 */
+
+  --accent-dim: color-mix(in srgb, var(--accent) 12%, transparent);
+  --glass-on: color-mix(in srgb, var(--accent) 14%, var(--glass));
+
+  --miss: #b0443c;
+
+  --shadow: rgba(40, 34, 28, 0.16);
+  --scrim: rgba(40, 34, 28, 0.25);
 }
 
 :root[data-spacing='wide'] {
