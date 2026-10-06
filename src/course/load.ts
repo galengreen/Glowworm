@@ -1,10 +1,9 @@
-// Browser loader: Vite bundles every course folder. Edits to course files hot-reload the player.
+// Browser loader: courses come from the central folder and the repo via scripts/courses-plugin.ts.
+// Edits to course files reload the player.
 import type { Widget } from '@kit';
+import { files as raw, locations, widgetModules } from 'virtual:glowworm-courses';
 import { parseCourses, validateCourse } from './parse';
 import type { Course, Issue } from './types';
-
-const raw = import.meta.glob('/courses/*/**/*.{md,yaml,yml}', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const widgetModules = import.meta.glob('/courses/*/widgets/*.ts', { eager: true }) as Record<string, { default: Widget }>;
 
 /** courseDir -> widgetId -> widget */
 export const widgets: Record<string, Record<string, Widget>> = {};
@@ -20,6 +19,8 @@ export const courses: Course[] = parsed.courses;
 export const issues: Issue[] = [...parsed.issues, ...parsed.courses.flatMap((c) => validateCourse(c))];
 
 export const courseDir = (course: Course) => course.root.replace('/courses/', '');
+/** Absolute path of a course folder on disk. */
+export const coursePath = (course: Course) => locations[courseDir(course)]?.path ?? course.root.slice(1);
 const LAST = 'glowworm:last-course';
 
 /** The requested course, else the last one opened, else the first real (non-sample) course. */

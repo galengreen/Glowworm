@@ -6,15 +6,26 @@ Conventions for any agent (Claude Code, Codex, …) that writes or edits a cours
 
 ## Folder layout
 
+Real courses live in a central folder, `~/.glowworm/courses/<course>/` (or `$GLOWWORM_HOME/courses/`), so every checkout of the app sees the same ones. The repo's `courses/` only holds the bundled sample. Run the CLI from the repo either way; `pnpm glowworm where` lists every course and its path.
+
 ```
-courses/<course>/
+<course>/
   course.yaml            title, levels, lesson order
-  sources/*.md           the user's material (slides, notes, past papers), as Markdown. Never edit.
+  materials/*            the user's original files (PDF, slides, notes, past papers), added in the player. Never edit.
+  sources/*.md           the material as Markdown: materials/<name>.<ext> becomes sources/<name>.md. Never edit once written.
   wiki/<concept>.md      one page per concept: the single source of truth
   lessons/<lesson>.md    3–5 minute segments, each ending in a recall question
   questions/*.yaml       question banks with hints, explanations and mark schemes
   widgets/<id>.ts        interactive figures built with the widget kit
 ```
+
+## Converting material
+
+The player's **Add material** page puts the user's files in `materials/` and gives the agent a prompt. A file counts as converted once `sources/<same name>.md` exists, so keep the name.
+
+- Transcribe, don't summarise: keep the wording, maths, tables and code.
+- Start with a `# Title`, then one heading per slide, page or section, with its number (`## Slide 12: Backpropagation`), so citations can point at it.
+- Describe diagrams in words; the wiki redraws them as figures.
 
 ## Citation chain
 

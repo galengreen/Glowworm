@@ -1,16 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { DEFS } from '@kit';
 import { courseDir, courses, findCourse } from './course/load';
 import type { Course } from './course/types';
 import { CourseContext } from './render/context';
 import { lessonProgress, resetProgress, useProgress } from './state/progress';
 import { go, href, useRoute, type Route } from './state/router';
+import { createCourse } from './state/materials';
 import { ACCENTS, THEMES, settings, useSettings } from './state/settings';
 import { closeDrawer, setPalette } from './state/ui';
 import { CommandPalette } from './ui/CommandPalette';
 import { Drawer } from './ui/Drawer';
 import { Home } from './ui/views/Home';
 import { Lesson } from './ui/views/Lesson';
+import { Materials } from './ui/views/Materials';
 import { Practice } from './ui/views/Practice';
 import { SourceView } from './ui/views/Source';
 import { WikiIndex, WikiPageView } from './ui/views/Wiki';
@@ -53,6 +55,7 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
     wiki: route.id ? course.wiki[route.id]?.title ?? 'Concept' : 'Concepts',
     source: course.sources[route.id ?? '']?.title ?? 'Source',
     practice: 'Practice',
+    materials: 'Add material',
   };
 
   return (
@@ -78,6 +81,9 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
       <button className={`chip${route.view === 'wiki' ? ' current' : ''}`} onClick={() => go(dir, 'wiki')} title="Every concept in the course (the wiki)">
         Concepts<span className="n dim">{Object.keys(course.wiki).length}</span>
       </button>
+      <button className={`chip${route.view === 'materials' ? ' current' : ''}`} onClick={() => go(dir, 'materials')} title="Add slides, notes and past papers, then build with your agent">
+        Add material
+      </button>
       <button className="chip" onClick={() => setPalette(true)} title="Search lessons and concepts">
         Search <kbd>⌘K</kbd>
       </button>
@@ -101,7 +107,6 @@ function usePopover() {
 
 function CourseMenu({ current, title }: { current: string; title: string }) {
   const { open, setOpen, ref } = usePopover();
-  if (courses.length < 2) return <a href={href(current)}>{title}</a>;
   return (
     <div style={{ position: 'relative' }} ref={ref}>
       <button aria-expanded={open} onClick={() => setOpen((o) => !o)}>{title} ▾</button>
@@ -113,9 +118,37 @@ function CourseMenu({ current, title }: { current: string; title: string }) {
               {c.meta.title}{c.meta.sample ? ' (sample)' : ''}
             </button>
           ))}
+          <hr />
+          <NewCourse />
         </div>
       )}
     </div>
+  );
+}
+
+/** Creates courses/<id>/course.yaml through the dev server, then opens it on Add material. */
+function NewCourse() {
+  const [title, setTitle] = useState('');
+  const [exam, setExam] = useState('');
+  const [error, setError] = useState<string>();
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    createCourse(title, exam || undefined).then(
+      ({ dir }) => {
+        location.hash = href(dir, 'materials');
+        location.reload(); // pick up the new course folder
+      },
+      (err: Error) => setError(err.message),
+    );
+  };
+  return (
+    <form className="new-course" onSubmit={submit}>
+      <span className="label-sm">New course</span>
+      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. SWEN438 Software Engineering" aria-label="Course title" />
+      <input type="datetime-local" value={exam} onChange={(e) => setExam(e.target.value)} aria-label="Exam date (optional)" title="Exam date (optional)" />
+      {error && <span className="error-line" role="alert">{error}</span>}
+      <button className="btn small" disabled={!title.trim()}>Create course</button>
+    </form>
   );
 }
 
@@ -178,6 +211,8 @@ function View({ course, route }: { course: Course; route: Route }) {
       const doc = course.sources[route.id ?? ''];
       return doc ? <SourceView doc={doc} anchor={route.sub} /> : <Missing what="source" />;
     }
+    case 'materials':
+      return <Materials key={course.root} />;
     case 'practice': {
       const concepts = route.query.get('concepts')?.split(',').filter(Boolean);
       return <Practice key={route.query.toString()} concepts={concepts} />;

@@ -19,9 +19,9 @@ export function Home() {
         {course.meta.sample && <span className="sample">Sample course, written for the prototype rather than from real course material</span>}
       </div>
 
-      <Today />
+      {Object.keys(course.lessons).length ? <Today /> : <NoLessons />}
 
-      <div className="section">
+      <div className="section" hidden={!course.meta.levels.length}>
         <div className="row" style={{ justifyContent: 'space-between', marginBottom: 16 }}>
           <span className="label-sm">Course map</span>
           <button className="linkish" style={{ fontSize: 14 }} onClick={() => go(dir, 'wiki')}>Browse all {Object.keys(course.wiki).length} concepts →</button>
@@ -79,6 +79,18 @@ export function Home() {
         </ul>
       </details>
     </div>
+  );
+}
+
+/** A new course: nothing to study until the agent has built something from the material. */
+function NoLessons() {
+  const { dir } = useCourse();
+  return (
+    <section className="empty-state no-lessons" aria-label="Get started">
+      <h2>No lessons yet</h2>
+      <p>Add your slides, notes and past papers, then hand them to your agent to build concepts, lessons and questions.</p>
+      <button className="btn live cta" onClick={() => go(dir, 'materials')}>Add material →</button>
+    </section>
   );
 }
 
