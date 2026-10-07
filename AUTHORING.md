@@ -2,7 +2,7 @@
 
 Conventions for any agent (Claude Code, Codex, …) that writes or edits a course. Read [PRODUCT.md](PRODUCT.md) for the why; this file is the how.
 
-**Loop:** read the sources → write wiki pages → write lessons, widgets and questions → `pnpm glowworm validate` until it passes → check the result in the player (`pnpm dev`).
+**Loop:** convert the material into sources → plan topics and widgets in `outline.yaml` → widget builders and one writer per topic work in parallel → the lead reviews each topic and asks for revisions → a consistency pass across topics → `pnpm glowworm validate` passes. See [Building from material](#building-from-material). Building a widget: [WIDGETS.md](WIDGETS.md).
 
 ## Folder layout
 
@@ -11,6 +11,7 @@ Real courses live in a central folder, `~/.glowworm/courses/<course>/` (or `$GLO
 ```
 <course>/
   course.yaml            title, levels, lesson order
+  outline.yaml           every source section assigned to a topic, or skipped with a reason
   materials/*            the user's original files (PDF, slides, notes, past papers), added in the player. Never edit.
   sources/*.md           the material as Markdown: materials/<name>.<ext> becomes sources/<name>.md. Never edit once written.
   wiki/<concept>.md      one page per concept: the single source of truth
@@ -25,7 +26,103 @@ The player's **Add material** page puts the user's files in `materials/` and giv
 
 - Transcribe, don't summarise: keep the wording, maths, tables and code.
 - Start with a `# Title`, then one heading per slide, page or section, with its number (`## Slide 12: Backpropagation`), so citations can point at it.
-- Describe diagrams in words; the wiki redraws them as figures.
+- Describe diagrams in words **under that slide's own heading**, after its text: what's drawn, the labels, and what it shows. Never put them in a separate file, because duplicate headings split one slide's content in two. The wiki redraws them as figures.
+- Check every slide or page made it across. A missing slide is content the course silently loses.
+
+## Building from material
+
+Two roles:
+
+- **The lead** (the agent the student started) plans, briefs writers, reviews their work and keeps the course consistent. The lead owns `course.yaml`, `outline.yaml` and `sources/`.
+- **Writers**, one per topic, each build one topic's wiki pages, lesson and questions.
+- **Widget builders**, one per widget (or a few small ones each), build the figures planned in the outline.
+
+In Claude Code, start writers and widget builders as subagents with the Agent tool, all in parallel. A subagent doesn't see your conversation, so its brief must hold everything it needs. Widgets take longest, so start their builders first.
+
+If your agent can't start subagents, play both roles yourself: write one topic at a time, then review it as if someone else wrote it.
+
+### 1. Lead: plan
+
+1. Convert any new material (above).
+2. Read every source in full, then write `outline.yaml`:
+
+   ```yaml
+   topics:
+     - id: dataflow                       # also names the writer's files
+       title: Dataflow analysis
+       sources: [week-3#slide-4..slide-11, week-4#slide-2]   # whole file, one section, or a range
+       concepts: [cfg, reaching-definitions, liveness]       # wiki pages this topic owns
+       widgets:                                              # figures to build, planned now so builders start straight away
+         - id: liveness-table
+           shows: Step through a CFG backwards and watch the live-variable sets grow until they stop changing
+       brief: Past paper Q3 asks for a worked liveness table  # optional notes for the writer
+   skip:
+     - src: week-1#slide-2-assessment
+       why: Course admin (assessment dates), not course content
+   ```
+
+   - **Nothing is left out by accident.** Every `##` section of every source belongs to a topic or is in `skip:` with a reason. `validate` fails otherwise.
+   - **Skip only what isn't course content:** admin, logistics, or topics the course says won't be examined. When in doubt, keep it.
+   - **Similar-sized topics**, roughly one lesson each (3–6 concepts), in prerequisite order.
+   - **Each concept has one owner.** Other topics can link to it but don't edit it.
+   - **Plan the widgets:** every concept with a knob (something to change and watch) gets one, plus the source diagrams worth making interactive. Give each an id and say what it shows. Writers use these ids in `diagram:` and `::figure` before the widgets exist.
+3. Set the bar before anyone writes. Decide the shared terms and notation (from the sources), the levels in `course.yaml`, and how hard questions should be (from past papers, if there are any).
+
+`validate` now lists every planned section as uncited. That's the to-do list.
+
+### 2. Widget builders and writers, in parallel
+
+Start the widget builders first. Each brief holds:
+
+- the course folder path, and that it should follow [WIDGETS.md](WIDGETS.md) (it doesn't need to read anything else first)
+- the widget id, what it shows (from the outline), and the source sections to draw from
+- the concept it illustrates, and the shared terms and notation
+- that it may only write `widgets/<id>.ts`
+
+A builder is done when `pnpm glowworm shot` reports no layout problems in every state it tested (including `--calm` and `--theme light`) and `pnpm typecheck` passes. It reports back the `shot` commands that show each state, so the lead can rerun them.
+
+Then give every writer the same brief, filled in for its topic:
+
+- the course folder path, and that it should follow this file
+- the topic's id, title and source sections, and the concepts it owns
+- the concepts other topics own (link to them with `:concept`, don't write them)
+- the shared terms, notation and question difficulty
+- the quality bar from step 3 below, word for word
+- the widget ids planned for its concepts, and what each shows (use them in `diagram:` and `::figure`; another agent builds them)
+- which files it may write: wiki pages for its own concepts, `lessons/<topic>.md` and `questions/<topic>.yaml`. Nothing else, so parallel writers never clash.
+- to run `pnpm glowworm validate <course>` **after every file it writes**, not just at the end, and fix its errors straight away
+
+A writer is done when `validate` shows no errors in its files, apart from widgets that are still being built. It reports back where each source section is taught (wiki page and lesson segment), anything in the source that looked unclear or wrong, and anything it couldn't fit.
+
+### 3. Lead: review each topic
+
+Review each topic against its **source sections**, not just against its own text. `pnpm glowworm coverage <course>` lists each section and the pages that cite it, plus each topic's concept, diagram and question counts. A citation only shows a page points at a section. Open both and check the content is really there.
+
+The quality bar:
+
+- **Complete.** Every definition, formula, algorithm, worked example, diagram and caveat in the topic's sections is in the wiki or the lesson.
+- **At or above the source's level.** The same precision and rigour: no formula replaced by a vague sentence, no steps dropped from a derivation or algorithm. Then add what the source lacks: the why, a worked example, a diagram, common misconceptions.
+- **Correct.** Every claim matches the section it cites.
+- **Questions at least as hard as the course asks.** Match past papers where there are any. Mix recall with application, and write mark schemes as separately checkable points.
+- **Follows this file:** show, don't tell; one recall per segment; New Zealand English.
+- **Widgets teach the concept** and match their source sections. Rerun the builder's `shot` commands: the layout check should be clean, and the screenshots should show the knob and its consequence.
+
+Send findings back to the **same writer or builder** (in Claude Code, continue it with SendMessage so it keeps its context). Make each finding specific: the section, what's missing or wrong, and what good looks like. Repeat until the topic meets the bar. After three rounds, fix what's left yourself.
+
+### 4. Lead: consistency pass
+
+Once every topic passes, compare them side by side:
+
+- depth and length of wiki pages, and questions per concept (see the coverage report)
+- difficulty and mix of question types
+- terms, notation and voice
+- prerequisite and related links across topics, and the level order in `course.yaml`
+
+Bring weaker topics up to the strongest one, never the other way. Finish when `validate` shows no errors (and `pnpm typecheck` passes if there are new widgets). Then report to the student: what's covered, what was skipped and why, and anything the sources didn't explain well enough to teach.
+
+### Adding material later
+
+Assign the new sections in `outline.yaml`, either to existing topics or to new ones. Only the affected topics go through steps 2 and 3. The consistency pass then compares them with the rest.
 
 ## Citation chain
 
@@ -109,26 +206,6 @@ Maths: `$inline$`, and display maths with `$$` on their own lines (a one-line `$
 
 ## Widgets
 
-A widget is a module in `widgets/` that default-exports `defineWidget({...})` from `@kit`. Look at `courses/neural-nets/widgets/` for examples.
+A widget is an interactive figure in `widgets/<id>.ts`. **[WIDGETS.md](WIDGETS.md) has everything needed to build one:** the workflow, the module shape, the kit API, the line-language classes, templates, and the rules. Check every widget with `pnpm glowworm shot <course> <id>`, which screenshots it and checks its layout.
 
-```ts
-import { defineWidget, frame, label } from '@kit';
-export default defineWidget({
-  id, name,
-  hint: 'keyboard shortcuts shown under the figure',
-  aria: 'full description for screen readers',
-  css: `[data-widget="<id>"] …`,       // scoped, tokens only
-  mount(stage, api) { … return { key(e) { … }, destroy() { … } }; },
-});
-```
-
-**Rules**
-
-1. **One concept, one or two knobs, a visible consequence.** Build a widget whenever a concept has something you can change and watch.
-2. **Predict first:** add `predict="…"` to the figure directive.
-3. **Tokens only.** No hex colours; `validate` rejects them. Use the figure vocabulary classes: `face`, `face top`, `detail`, `wire`, `wire teach`, `wire hot`, `pulse`, `press`, `latched`, `glass`, `halo`, `grid`, `axis`, `edge`, `curve`, `trail`, `marker`, `ghost`, `label`, `label-hi`, `label-live`.
-4. **Line language:** `detail`/`line` strokes for structure; strokes that teach use `ink`/`ink-hi` or the accent. The accent means *live*: active, flowing, correct.
-5. **Isometric for things and systems** (`frame`, `TOP`/`FRONT`/`SIDE`, `box`, `path`); **flat 2D for plots and graphs** (`scale`, `arrow`, `label`).
-6. **Teaching labels face the screen:** use `label()` at a projected point, not text on an isometric face.
-7. **Accessible:** a full `aria` description, every interaction available from the keyboard via `key()`, and respect `api.calm` (no animation).
-8. Use `api.after/every/loop` for timing so everything is cleaned up on unmount. Put native controls (sliders, buttons) in `api.controls`.
+Use widgets in lessons with `::figure{widget=<id> predict="…"}`, and as a concept's standard diagram with `diagram:` in its wiki page.

@@ -1,40 +1,37 @@
 // The prompt the player hands to the user's agent to turn new material into course content.
+// The process itself lives in AUTHORING.md ("Building from material"); this only says what's new and where.
 import type { Material } from '../../scripts/dev-api';
 import type { Course } from './types';
 
 /** `root` is the course folder on disk; the agent runs in the Glowworm repo with write access to it. */
 export function buildPrompt(course: Course, dir: string, root: string, files: Material[], note: string) {
   const fresh = files.filter((f) => !f.converted);
-  const lessons = Object.keys(course.lessons).length;
+  const built = Object.keys(course.lessons).length > 0;
   const lines = [
-    `You're building the Glowworm course in \`${root}/\` ("${course.meta.title}"). Write course files in that folder, even though it may be outside this repo. Follow AUTHORING.md exactly; PRODUCT.md explains the why. Use New Zealand English.`,
+    `You're the lead for the Glowworm course in \`${root}/\` ("${course.meta.title}"). Write course files in that folder, even though it may be outside this repo. Use New Zealand English.`,
+    '',
+    'Read AUTHORING.md first, and follow its "Building from material" process exactly: plan every source section into topics, and the widgets to build, in `outline.yaml`; start a widget builder subagent per widget (following WIDGETS.md) and a writer subagent per topic, all in parallel with the same briefs; review each topic against its source sections and send revisions until it meets the quality bar, then do a consistency pass across all topics. Nothing in the sources may be left out unless it\'s skipped with a reason, and the wiki and lessons must be at least as complete and rigorous as the sources.',
     '',
   ];
 
   if (fresh.length) {
     lines.push(
-      `New material in \`${root}/materials/\` that isn't in \`sources/\` yet:`,
+      `New material in \`${root}/materials/\` to convert into \`sources/\` first:`,
       ...fresh.map((f) => `- ${f.name}`),
       '',
-      '1. Convert each file to Markdown at `sources/<same name>.md` (e.g. `materials/week-3.pdf` → `sources/week-3.md`). Transcribe, don\'t summarise: keep the wording, maths, tables and code. Start with a `# Title` heading, then one heading per slide, page or section, with the slide or page number in the heading (e.g. `## Slide 12: Backpropagation`) so citations can point at it. Describe diagrams in words. Never edit `materials/` or existing sources.',
-      lessons
-        ? '2. Work out the learning objectives the new sources cover and where they fit in the existing levels in `course.yaml`. Add new levels or lessons rather than renaming existing ids.'
-        : '2. Work out the learning objectives across all the sources, then plan the levels in `course.yaml` from the prerequisite order of the concepts.',
-      '3. Write or update wiki pages (one concept each, every claim cited), then lessons, widgets and questions (3+ per concept). If the material includes past papers, calibrate exam-style questions against them.',
+      built
+        ? 'The course already has content. Assign the new sections in `outline.yaml` (to existing topics or new ones), and only rebuild and review the affected topics, then run the consistency pass.'
+        : 'The course has no content yet, so plan the whole outline from the sources.',
     );
+  } else if (!course.outline) {
+    lines.push('All material is already in `sources/`, but the course has no `outline.yaml`. Write it from the sources, then fill whatever the coverage check shows is missing or below the bar, topic by topic.');
   } else {
-    lines.push(
-      'Everything in `materials/` is already in `sources/`. Check the course against its sources and fill the gaps:',
-      '',
-      '1. Every topic in `sources/` should have a wiki page, be taught in a lesson, and have 3+ questions.',
-      '2. Add missing standard diagrams and widgets wherever a concept has a knob.',
-      '3. If past papers are in the sources, check the questions are calibrated against them.',
-    );
+    lines.push('All material is already in `sources/`. Review every topic against the quality bar, send writers to fix what falls short, then run the consistency pass.');
   }
 
   lines.push(
-    `4. From this repo, run \`pnpm glowworm validate ${dir}\` until there are no errors, and \`pnpm typecheck\` if you added widgets (\`@kit\` resolves to this repo's src/kit).`,
-    '5. Finish with a short summary: what you added, and anything the sources didn\'t cover well enough to teach.',
+    '',
+    `Run the CLI from this repo: \`pnpm glowworm validate ${dir}\` and \`pnpm glowworm coverage ${dir}\`, plus \`pnpm typecheck\` if there are new widgets (\`@kit\` resolves to this repo's src/kit). Finish with a short report: what's covered, what was skipped and why, and anything the sources didn't explain well enough to teach.`,
   );
   if (note.trim()) lines.push('', 'Notes from the student:', note.trim());
   return lines.join('\n');

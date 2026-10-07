@@ -1,0 +1,18 @@
+# How the sources split into topics. Each topic is built by one writer and reviewed as a unit.
+# Every source section must be in a topic or skipped with a reason; `pnpm glowworm coverage` shows the map.
+topics:
+  - id: neuron
+    title: A single neuron
+    sources: [notes#artificial-neurons..logic-gates-with-a-perceptron]
+    concepts: [neuron, weighted-sum, activation-function]
+    widgets:
+      - id: neuron
+        shows: An isometric neuron. Toggle the inputs and watch the weighted sum cross the threshold, making an AND gate
+  - id: learning
+    title: Learning by gradient descent
+    sources: [notes#loss-functions..choosing-the-learning-rate]
+    concepts: [loss-function, gradient, gradient-descent, learning-rate]
+    widgets:
+      - id: gradient-descent
+        shows: Gradient descent on a bowl-shaped loss. Change the learning rate and watch it creep, converge, oscillate or diverge
+skip: []

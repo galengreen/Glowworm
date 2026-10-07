@@ -53,6 +53,40 @@ export interface SourceDoc {
   title: string;
   body: string;
   anchors: string[]; // heading slugs
+  sections: SourceSection[]; // the units coverage is checked in
+}
+
+/** A `##` section of a source (one slide, page or section), with the headings nested under it. */
+export interface SourceSection {
+  slug: string; // '' when the source has no `##` headings and is one section
+  title: string;
+  anchors: string[];
+}
+
+/** outline.yaml: how the course's sources are split into topics, each built and reviewed as a unit. */
+export interface Topic {
+  id: string;
+  title: string;
+  sources: string[]; // `notes` (every section), `notes#a`, or a range `notes#a..d`
+  concepts: string[]; // wiki pages this topic owns
+  widgets: PlannedWidget[]; // figures to build, planned up front so builders can start straight away
+  brief?: string; // anything the topic's writer needs to know
+}
+
+export interface PlannedWidget {
+  id: string;
+  shows: string; // what the figure teaches: the knob and the consequence
+}
+
+/** A widget module as the parser sees it. */
+export interface WidgetMeta {
+  id: string;
+  sources: string[];
+}
+
+export interface Outline {
+  topics: Topic[];
+  skip: { src: string; why: string }[]; // sources deliberately left out, with the reason
 }
 
 export interface MarkPoint {
@@ -100,6 +134,8 @@ export interface Course {
   sources: Record<string, SourceDoc>;
   questions: Record<string, Question>;
   widgetIds: string[];
+  widgets: WidgetMeta[];
+  outline?: Outline;
 }
 
 export interface Issue {

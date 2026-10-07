@@ -12,8 +12,8 @@ for (const [path, mod] of Object.entries(widgetModules)) {
   (widgets[dir] ??= {})[mod.default.id] = mod.default;
 }
 
-const widgetIds = Object.fromEntries(Object.entries(widgets).map(([dir, w]) => [dir, Object.keys(w)]));
-const parsed = parseCourses(raw, widgetIds);
+const widgetMap = Object.fromEntries(Object.entries(widgets).map(([dir, w]) => [dir, Object.values(w).map(({ id, sources = [] }) => ({ id, sources }))]));
+const parsed = parseCourses(raw, widgetMap);
 
 export const courses: Course[] = parsed.courses;
 export const issues: Issue[] = [...parsed.issues, ...parsed.courses.flatMap((c) => validateCourse(c))];

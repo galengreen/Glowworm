@@ -1,7 +1,7 @@
 // Pure parsing and validation of course folders. Shared by the player (Vite glob) and the CLI (fs).
 import { parse as parseYaml } from 'yaml';
 import GithubSlugger from 'github-slugger';
-import type { Course, CourseMeta, DiagramRef, Issue, Lesson, Question, Segment, SourceDoc, WikiPage } from './types';
+import type { Course, CourseMeta, DiagramRef, Issue, Lesson, Outline, PlannedWidget, Question, Segment, SourceDoc, SourceSection, WidgetMeta, WikiPage } from './types';
 
 /** Map of absolute-ish path (`/courses/<id>/...`) to raw file contents. */
 export type FileMap = Record<string, string>;
@@ -22,16 +22,30 @@ function parseDiagram(v: unknown): DiagramRef | undefined {
 
 const arr = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : v == null ? [] : [String(v)]);
 
-export function headingSlugs(markdown: string): string[] {
+function headings(markdown: string) {
   const slugger = new GithubSlugger();
-  const out: string[] = [];
+  const out: { depth: number; title: string; slug: string }[] = [];
   let inFence = false;
   for (const line of markdown.split('\n')) {
     if (/^```/.test(line)) inFence = !inFence;
-    const h = !inFence && /^#{1,6}\s+(.*?)\s*#*$/.exec(line);
-    if (h) out.push(slugger.slug(h[1]));
+    const h = !inFence && /^(#{1,6})\s+(.*?)\s*#*$/.exec(line);
+    if (h) out.push({ depth: h[1].length, title: h[2], slug: slugger.slug(h[2]) });
   }
   return out;
+}
+
+export const headingSlugs = (markdown: string) => headings(markdown).map((h) => h.slug);
+
+/** Split a source at its `##` headings; deeper headings belong to the section above them. */
+function sourceSections(markdown: string): SourceSection[] {
+  const all = headings(markdown);
+  if (!all.some((h) => h.depth === 2)) return [{ slug: '', title: all[0]?.title ?? '', anchors: all.map((h) => h.slug) }];
+  const sections: SourceSection[] = [];
+  for (const h of all) {
+    if (h.depth === 2) sections.push({ slug: h.slug, title: h.title, anchors: [h.slug] });
+    else if (h.depth > 2) sections.at(-1)?.anchors.push(h.slug);
+  }
+  return sections;
 }
 
 /** Lessons are split into segments at `## Title {#id}` headings. */
@@ -56,7 +70,18 @@ function splitSegments(body: string, lessonId: string): Segment[] {
   return segments;
 }
 
-export function parseCourses(files: FileMap, widgetIds: Record<string, string[]>): { courses: Course[]; issues: Issue[] } {
+/** courseDir -> widgets in that course */
+export type WidgetMap = Record<string, WidgetMeta[]>;
+
+/** `sources: ['a#b', "c"]` inside a widget module's defineWidget({...}), read without running it (for the CLI). */
+export function widgetMetaFromSource(src: string): WidgetMeta | undefined {
+  const id = /defineWidget\(\s*\{\s*id:\s*['"]([\w-]+)['"]/.exec(src)?.[1];
+  if (!id) return undefined;
+  const list = /\bsources:\s*\[([^\]]*)\]/.exec(src)?.[1] ?? '';
+  return { id, sources: [...list.matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]) };
+}
+
+export function parseCourses(files: FileMap, widgetMap: WidgetMap): { courses: Course[]; issues: Issue[] } {
   const issues: Issue[] = [];
   const byCourse = new Map<string, FileMap>();
   for (const [path, raw] of Object.entries(files)) {
@@ -74,7 +99,8 @@ export function parseCourses(files: FileMap, widgetIds: Record<string, string[]>
       continue;
     }
     const meta = parseYaml(map['course.yaml']) as CourseMeta;
-    const course: Course = { meta, root, lessons: {}, wiki: {}, sources: {}, questions: {}, widgetIds: widgetIds[dir] ?? [] };
+    const widgets = widgetMap[dir] ?? [];
+    const course: Course = { meta, root, lessons: {}, wiki: {}, sources: {}, questions: {}, widgets, widgetIds: widgets.map((w) => w.id) };
 
     for (const [file, raw] of Object.entries(map)) {
       try {
@@ -109,8 +135,23 @@ export function parseCourses(files: FileMap, widgetIds: Record<string, string[]>
         } else if (file.startsWith('sources/') && file.endsWith('.md')) {
           const id = file.replace(/^sources\/|\.md$/g, '');
           const title = /^#\s+(.*)$/m.exec(raw)?.[1] ?? id;
-          const doc: SourceDoc = { id, file, title, body: raw, anchors: headingSlugs(raw) };
+          const doc: SourceDoc = { id, file, title, body: raw, anchors: headingSlugs(raw), sections: sourceSections(raw) };
           course.sources[id] = doc;
+        } else if (file === 'outline.yaml') {
+          const data = (parseYaml(raw) ?? {}) as Partial<Outline>;
+          course.outline = {
+            topics: (data.topics ?? []).map((t) => ({
+              ...t,
+              id: String(t.id),
+              title: String(t.title ?? t.id),
+              sources: arr(t.sources),
+              concepts: arr(t.concepts),
+              widgets: (Array.isArray(t.widgets) ? t.widgets : []).map((w: PlannedWidget | string) =>
+                typeof w === 'string' ? { id: w, shows: '' } : { id: String(w.id), shows: String(w.shows ?? '') },
+              ),
+            })),
+            skip: (data.skip ?? []).map((s) => ({ src: String(s.src ?? ''), why: String(s.why ?? '') })),
+          };
         } else if (file.startsWith('questions/') && /\.ya?ml$/.test(file)) {
           const list = parseYaml(raw) as Record<string, unknown>[];
           for (const q of list ?? []) {
@@ -154,6 +195,69 @@ export function resolveSource(course: Course, ref: string): boolean {
   const [doc, anchor] = ref.split('#');
   const source = course.sources[doc];
   return !!source && (!anchor || source.anchors.includes(anchor));
+}
+
+const sectionKey = (doc: string, slug: string) => (slug ? `${doc}#${slug}` : doc);
+
+/**
+ * The source sections a reference covers, as `doc#slug` keys, or undefined if it doesn't resolve.
+ * `notes` is every section, `notes#a` the section holding heading a, `notes#a..d` sections a to d.
+ */
+export function expandSourceRef(course: Course, ref: string): string[] | undefined {
+  const [doc, anchor = ''] = ref.split('#');
+  const source = course.sources[doc];
+  if (!source) return undefined;
+  const all = source.sections.map((s) => sectionKey(doc, s.slug));
+  if (!anchor) return all;
+  const index = (a: string) => source.sections.findIndex((s) => s.anchors.includes(a));
+  const [from, to = from] = anchor.split('..').map(index);
+  if (anchor === headingSlugs(source.body)[0] && from < 0) return all; // the `#` title
+  if (from < 0 || to < 0 || to < from) return undefined;
+  return all.slice(from, to + 1);
+}
+
+export interface TopicCoverage {
+  topic: string;
+  sections: { key: string; title: string; citedBy: string[] }[];
+  missingConcepts: string[];
+  missingWidgets: string[];
+}
+
+/** How each topic's source sections are covered, and which sections no topic or skip accounts for. */
+export function coverage(course: Course) {
+  const outline = course.outline ?? { topics: [], skip: [] };
+  const titles = new Map<string, string>();
+  for (const [doc, source] of Object.entries(course.sources)) for (const s of source.sections) titles.set(sectionKey(doc, s.slug), s.title || source.title);
+
+  // Who cites each section: wiki `sources:` and inline :cite in wiki pages and lessons.
+  const citedBy = new Map<string, Set<string>>();
+  const cite = (ref: string, by: string) => {
+    for (const key of ref.includes('..') ? [] : expandSourceRef(course, ref) ?? []) {
+      if (!ref.includes('#') && (course.sources[ref]?.sections.length ?? 0) > 1) continue; // a whole-file cite doesn't cover each slide
+      (citedBy.get(key) ?? citedBy.set(key, new Set()).get(key)!).add(by);
+    }
+  };
+  for (const page of Object.values(course.wiki)) {
+    for (const s of page.sources) cite(s, page.file);
+    for (const s of scanDirectives(page.body).cites) cite(s, page.file);
+  }
+  for (const lesson of Object.values(course.lessons)) for (const seg of lesson.segments) for (const s of scanDirectives(seg.body).cites) cite(s, lesson.file);
+  for (const w of course.widgets) for (const s of w.sources) cite(s, `widgets/${w.id}`);
+
+  const assigned = new Set<string>();
+  const topics: TopicCoverage[] = outline.topics.map((t) => {
+    const keys = [...new Set(t.sources.flatMap((r) => expandSourceRef(course, r) ?? []))];
+    keys.forEach((k) => assigned.add(k));
+    return {
+      topic: t.id,
+      sections: keys.map((key) => ({ key, title: titles.get(key) ?? key, citedBy: [...(citedBy.get(key) ?? [])] })),
+      missingConcepts: t.concepts.filter((c) => !course.wiki[c]),
+      missingWidgets: t.widgets.map((w) => w.id).filter((id) => !course.widgetIds.includes(id)),
+    };
+  });
+  const skipped = new Set(outline.skip.flatMap((s) => expandSourceRef(course, s.src) ?? []));
+  const unassigned = [...titles.keys()].filter((k) => !assigned.has(k) && !skipped.has(k)).map((key) => ({ key, title: titles.get(key)! }));
+  return { topics, unassigned, skipped: outline.skip };
 }
 
 export function validateCourse(course: Course, widgetSources: Record<string, string> = {}): Issue[] {
@@ -207,9 +311,42 @@ export function validateCourse(course: Course, widgetSources: Record<string, str
     if (q.type === 'numeric' && typeof q.tolerance !== 'number') err(q.file, `Question "${q.id}" needs a tolerance`);
   }
 
+  checkOutline();
+
+  for (const w of course.widgets) for (const s of w.sources) if (!resolveSource(course, s)) err(`widgets/${w.id}.ts`, `Source "${s}" not found`);
+
   for (const [file, src] of Object.entries(widgetSources)) {
     const hex = src.match(/#[0-9a-fA-F]{3,8}\b/g);
     if (hex) err(file, `Hard-coded colours ${[...new Set(hex)].join(', ')}: use tokens (var(--…))`);
+  }
+
+  /** Nothing in the sources is left out: every section belongs to a topic that cites it, or is skipped with a reason. */
+  function checkOutline() {
+    const outline = course.outline;
+    if (!outline) {
+      if (Object.keys(course.sources).length) warn('course.yaml', 'No outline.yaml, so coverage of the sources isn\'t checked');
+      return;
+    }
+    const owner = new Map<string, string>();
+    for (const t of outline.topics) {
+      for (const r of t.sources) if (!expandSourceRef(course, r)) err('outline.yaml', `Topic "${t.id}": source "${r}" not found`);
+      for (const c of t.concepts) {
+        if (owner.has(c)) err('outline.yaml', `Concept "${c}" is owned by both "${owner.get(c)}" and "${t.id}"`);
+        owner.set(c, t.id);
+      }
+    }
+    for (const s of outline.skip) {
+      if (!expandSourceRef(course, s.src)) err('outline.yaml', `Skipped source "${s.src}" not found`);
+      if (!s.why.trim()) err('outline.yaml', `Skipped source "${s.src}" needs a reason (why:)`);
+    }
+    const report = coverage(course);
+    for (const t of report.topics) {
+      for (const c of t.missingConcepts) err('outline.yaml', `Topic "${t.topic}" plans concept "${c}", which has no wiki page`);
+      for (const w of t.missingWidgets) err('outline.yaml', `Topic "${t.topic}" plans widget "${w}", which hasn't been built`);
+      for (const s of t.sections) if (!s.citedBy.length) err('outline.yaml', `Topic "${t.topic}" covers ${s.key} ("${s.title}"), but no wiki page or lesson cites it`);
+    }
+    for (const s of report.unassigned) err('outline.yaml', `${s.key} ("${s.title}") is left out: add it to a topic, or skip it with a reason`);
+    for (const page of Object.values(course.wiki)) if (!owner.has(page.id)) warn(page.file, 'No topic in outline.yaml owns this concept');
   }
 
   function checkBody(file: string, body: string) {

@@ -36,6 +36,8 @@ export interface Widget {
   hint: string;
   /** Full description for screen readers. */
   aria: string;
+  /** Source sections the widget is drawn from, e.g. ['intro#slide-23']. Counts towards coverage. */
+  sources?: string[];
   /** Scoped CSS: prefix selectors with [data-widget="<id>"]. Tokens only. */
   css?: string;
   mount: (stage: SVGSVGElement, api: WidgetApi) => WidgetHandle | void;

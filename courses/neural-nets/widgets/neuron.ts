@@ -6,6 +6,7 @@ const fmt = (v: number) => (v < 0 ? '−' : '') + Math.abs(v).toFixed(1);
 export default defineWidget({
   id: 'neuron',
   name: 'Single neuron',
+  sources: ['notes#artificial-neurons', 'notes#weighted-sum-and-bias', 'notes#activation-functions', 'notes#logic-gates-with-a-perceptron'],
   hint: '1 · 2 toggle inputs · q/a w₁ · w/s w₂ · click the blocks',
   aria:
     'Isometric diagram of a single artificial neuron. Two input blocks, x1 and x2, connect by wires to a neuron box. Each wire has a weight. ' +

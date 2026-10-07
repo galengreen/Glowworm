@@ -10,6 +10,7 @@ const grad = (w: number) => w - TARGET;
 export default defineWidget({
   id: 'gradient-descent',
   name: 'Gradient descent',
+  sources: ['notes#gradient-descent', 'notes#choosing-the-learning-rate'],
   hint: '← → learning rate · space step · r run · 0 reset',
   aria:
     'Line chart of a loss curve shaped like a bowl, with its minimum at w = 3. A glowing point marks the current weight, with a tangent line showing the slope. ' +
@@ -18,6 +19,7 @@ export default defineWidget({
   css: `
     [data-widget="gradient-descent"] .controls label { display: flex; align-items: center; gap: 10px; letter-spacing: .1em; text-transform: uppercase; font-size: 11px; margin-right: auto; }
     [data-widget="gradient-descent"] input[type=range] { width: 180px; accent-color: var(--accent); }
+    [data-widget="gradient-descent"] .sym { text-transform: none; font-size: 13px; }
     [data-widget="gradient-descent"] .lr { color: var(--accent-hi); min-width: 3.5em; }
   `,
   mount(stage, api) {
@@ -56,7 +58,7 @@ export default defineWidget({
 
     // native controls
     api.controls.innerHTML = `
-      <label>η learning rate <input type="range" min="0.05" max="2.2" step="0.05" aria-label="Learning rate"/> <span class="lr"></span></label>
+      <label><span class="sym">η</span> learning rate <input type="range" min="0.05" max="2.2" step="0.05" aria-label="Learning rate"/> <span class="lr"></span></label>
       <button class="btn" data-a="step">Step</button>
       <button class="btn" data-a="run">Run</button>
       <button class="btn" data-a="reset">Reset</button>`;
@@ -83,7 +85,9 @@ export default defineWidget({
         const next = w - lr * g;
         if (!converged() && Math.abs(X(clampW(next)) - X(w)) > 16) s += arrow(X(w), Y(loss(w)) + 22, X(clampW(next)), Y(loss(w)) + 22, 'edge', 2);
         s += `<circle class="marker" cx="${X(w)}" cy="${Y(loss(w))}" r="6"/>`;
-        s += label(X(w), Y(loss(w)) - 20, `slope ${g.toFixed(2).replace('-', '−')}`, 'label-hi');
+        // inside the bowl, away from the curve and the tangent: up-right on the left wall, up-left on the right
+        const side = Math.abs(g) < 0.5 ? 0 : g < 0 ? 1 : -1;
+        s += label(X(w) + side * 16, Y(loss(w)) - (side ? 16 : 20), `slope ${g.toFixed(2).replace('-', '−')}`, 'label-hi', side > 0 ? 'start' : side < 0 ? 'end' : 'middle');
       } else {
         s += label(X(clampW(w)) + (w > TARGET ? -10 : 10), Y(25), 'diverging: steps overshoot further each time', 'label-live', w > TARGET ? 'end' : 'start');
       }

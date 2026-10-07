@@ -13,6 +13,7 @@ import { Drawer } from './ui/Drawer';
 import { Home } from './ui/views/Home';
 import { Lesson } from './ui/views/Lesson';
 import { Materials } from './ui/views/Materials';
+import { WidgetPreview } from './ui/views/WidgetPreview';
 import { Practice } from './ui/views/Practice';
 import { SourceView } from './ui/views/Source';
 import { WikiIndex, WikiPageView } from './ui/views/Wiki';
@@ -56,6 +57,7 @@ function TopBar({ course, dir, route }: { course: Course; dir: string; route: Ro
     source: course.sources[route.id ?? '']?.title ?? 'Source',
     practice: 'Practice',
     materials: 'Add material',
+    widget: route.id ? `Widget · ${route.id}` : 'Widgets',
   };
 
   return (
@@ -222,6 +224,8 @@ function View({ course, route }: { course: Course; route: Route }) {
     }
     case 'materials':
       return <Materials key={course.root} />;
+    case 'widget':
+      return <WidgetPreview id={route.id} query={route.query} />;
     case 'practice': {
       const concepts = route.query.get('concepts')?.split(',').filter(Boolean);
       return <Practice key={route.query.toString()} concepts={concepts} />;
